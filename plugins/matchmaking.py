@@ -79,7 +79,7 @@ class matchmaking(commands.Cog):
 									reactedMentions.append(reactedUser.mention)
 								
 					embed = discord.Embed(description="Playing: "+message.content.split(" ")[0]+" "+" ".join(reactedMentions))
-					await message.edit(message.content,embed=embed)
+					await message.edit(content=message.content,embed=embed)
 					for messageReaction in message.reactions:
 						if str(messageReaction) == "🔔":
 							reactedUsers = await messageReaction.users().flatten()
@@ -95,7 +95,7 @@ class matchmaking(commands.Cog):
 						return False
 					currentReacter = channel.guild.get_member(int(payload.user_id))
 					if currentReacter.mention == message.content.split(" ")[0]:
-						await message.edit("Game closed/full. Sorry!")
+						await message.edit(content="Game closed/full. Sorry!")
 					else:
 						print("Not game creator, cannot close.")
 					
