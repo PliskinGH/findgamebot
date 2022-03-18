@@ -43,7 +43,7 @@ class matchmaking(commands.Cog):
             if (len(gamesNames[index]) >= 1):
                 gameWanted = "**" + gamesNames[index] + "** " + gameWanted
             if (len(gamesRoles[index]) >= 1):
-                gameWanted += "(" + gamesRoles[index] + ")"
+                gameWanted += " (" + gamesRoles[index] + ")"
             desc = desc[1:]
         
         embed = discord.Embed(description="Playing: "+ctx.message.author.mention)
