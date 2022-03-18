@@ -1,4 +1,3 @@
-config.ini
 .env
 __pycache__/
 plugins/__pycache__/
