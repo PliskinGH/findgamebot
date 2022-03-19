@@ -53,7 +53,7 @@ class matchmaking(commands.Cog):
         await ctx.message.delete()
     
     @commands.Cog.listener()
-    async def on_raw_reaction_add(self,payload):
+    async def on_raw_reaction_add(self, payload):
         validEmojis = ["👍","🔔","❌"]
         
         if int(payload.user_id) == int(self.bot.user.id):
@@ -62,7 +62,8 @@ class matchmaking(commands.Cog):
         if str(payload.emoji.name) in validEmojis:
             channel = self.bot.get_channel(int(payload.channel_id))
             message = await channel.fetch_message(int(payload.message_id))
-            #print("Valid emoji")
+            if (message.author.id != self.bot.user.id):
+                return False
             
             #print(" ".join((message.content.split(" ")[1:])))
             if " ".join((message.content.split(" ")[1:])).startswith("is looking for a "):
@@ -100,7 +101,7 @@ class matchmaking(commands.Cog):
                     
     
     @commands.Cog.listener()
-    async def on_raw_reaction_remove(self,payload):
+    async def on_raw_reaction_remove(self, payload):
         validEmojis = ["👍"]
         
         if int(payload.user_id) == int(self.bot.user.id):
@@ -109,7 +110,8 @@ class matchmaking(commands.Cog):
         if str(payload.emoji.name) in validEmojis:
             channel = self.bot.get_channel(int(payload.channel_id))
             message = await channel.fetch_message(int(payload.message_id))
-            #print("Valid emoji")
+            if (message.author.id != self.bot.user.id):
+                return False
             
             #print(" ".join((message.content.split(" ")[1:])))
             if " ".join((message.content.split(" ")[1:])).startswith("is looking for a "):
