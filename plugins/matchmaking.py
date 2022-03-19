@@ -29,11 +29,7 @@ class matchmaking(commands.Cog):
         if (not(found)):
             guild = CONFIG_DEFAULT
         
-        print(found)
-        print(guild)
-        
         games = split_config_list(self.config.get(guild, CONFIG_GAMES_COMMANDS, fallback=None))
-        print(games)
         gamesNames = split_config_list(self.config.get(guild, CONFIG_GAMES_NAMES, fallback=None))
         gamesRoles = split_config_list(self.config.get(guild, CONFIG_GAMES_ROLES, fallback=None))
                 
