@@ -12,9 +12,50 @@ def split_config_list(value):
     return [x.strip() for x in value.split(',')]
 
 class matchmaking(commands.Cog):
+    
+    async def lfg_help(self, ctx):
+        text = "Syntax:\n"
+        text += "!lfg <game> <description> where <game> is a game available on the server with a corresponding role to ping.\n"
+        text += "or\n"
+        text += "!lfg <description> for a custom game (no automatic ping).\n"
+        
+        games = []
+        gamesNames = []
+        
+        guildId = ctx.guild.id
+        
+        for guild in self.config.sections():
+            found = (guildId == self.config.getint(guild, CONFIG_ID, fallback=None))
+            if (found):
+                break
+        
+        if (not(found)):
+            guild = CONFIG_DEFAULT
+        
+        games = split_config_list(self.config.get(guild, CONFIG_GAMES_COMMANDS, fallback=None))
+        gamesNames = split_config_list(self.config.get(guild, CONFIG_GAMES_NAMES, fallback=None))
+        
+        commands_list = []
+        for game in games:
+            index = games.index(game)
+            command_text = " • "
+            command_text += game
+            if (len(gamesNames) == len(games) and len(gamesNames[index]) >= 1):
+                command_text += " : Looking for a "
+                command_text += "**" + gamesNames[index] + "** game."
+            command_text += "\n"
+            commands_list.append(command_text)
+        
+        embed = discord.Embed(description="".join(commands_list))
+        text += "Games available in your server:\n"
+        
+        await ctx.send(text,embed=embed)
         
     @commands.command(pass_context=True, brief="", name='lfg')
     async def lfgCMD(self, ctx, *desc):
+        if (desc[0] == "help"):
+            return await self.lfg_help(ctx)
+            
         games = []
         gamesNames = []
         gamesRoles = []
@@ -36,9 +77,9 @@ class matchmaking(commands.Cog):
         gameWanted = "game"
         if (desc[0] in games):
             index = games.index(desc[0])
-            if (len(gamesNames[index]) >= 1):
+            if (len(gamesNames) == len(games) and len(gamesNames[index]) >= 1):
                 gameWanted = "**" + gamesNames[index] + "** " + gameWanted
-            if (len(gamesRoles[index]) >= 1):
+            if (len(gamesRoles) == len(games) and len(gamesRoles[index]) >= 1):
                 gameWanted += " (" + gamesRoles[index] + ")"
             desc = desc[1:]
         
