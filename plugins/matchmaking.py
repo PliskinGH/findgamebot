@@ -13,19 +13,18 @@ def split_config_list(value):
 
 class matchmaking(commands.Cog):
     
-    async def lfg_help(self, ctx):
-        text = "Syntax:\n"
-        text += "!lfg <game> <description> where <game> is a game available on the server with a corresponding role to ping.\n"
-        text += "or\n"
-        text += "!lfg <description> for a custom game (no automatic ping).\n"
-        
+    def __init__(self, bot, config = None):
+        print("Match making plugin started.")
+        self.bot = bot
+        self.config = config
+    
+    def get_configured_games(self, guild_id):
         games = []
         gamesNames = []
-        
-        guildId = ctx.guild.id
+        gamesRoles = []
         
         for guild in self.config.sections():
-            found = (guildId == self.config.getint(guild, CONFIG_ID, fallback=None))
+            found = (guild_id == self.config.getint(guild, CONFIG_ID, fallback=None))
             if (found):
                 break
         
@@ -34,6 +33,17 @@ class matchmaking(commands.Cog):
         
         games = split_config_list(self.config.get(guild, CONFIG_GAMES_COMMANDS, fallback=None))
         gamesNames = split_config_list(self.config.get(guild, CONFIG_GAMES_NAMES, fallback=None))
+        gamesRoles = split_config_list(self.config.get(guild, CONFIG_GAMES_ROLES, fallback=None))
+        
+        return (games, gamesNames, gamesRoles)
+    
+    async def lfg_help(self, ctx):
+        text = "Syntax:\n"
+        text += "!lfg <game> <description> where <game> is a game available on the server with a corresponding role to ping.\n"
+        text += "or\n"
+        text += "!lfg <description> for a custom game (no automatic ping).\n"
+        
+        games, gamesNames, _ = self.get_configured_games(ctx.guild.id)
         
         commands_list = []
         for game in games:
@@ -47,32 +57,12 @@ class matchmaking(commands.Cog):
             commands_list.append(command_text)
         
         embed = discord.Embed(description="".join(commands_list))
-        text += "Games available in your server:\n"
+        text += "Games available on your server:\n"
         
         await ctx.send(text,embed=embed)
         
-    @commands.command(pass_context=True, brief="", name='lfg')
-    async def lfgCMD(self, ctx, *desc):
-        if (desc[0] == "help"):
-            return await self.lfg_help(ctx)
-            
-        games = []
-        gamesNames = []
-        gamesRoles = []
-        
-        guildId = ctx.guild.id
-        
-        for guild in self.config.sections():
-            found = (guildId == self.config.getint(guild, CONFIG_ID, fallback=None))
-            if (found):
-                break
-        
-        if (not(found)):
-            guild = CONFIG_DEFAULT
-        
-        games = split_config_list(self.config.get(guild, CONFIG_GAMES_COMMANDS, fallback=None))
-        gamesNames = split_config_list(self.config.get(guild, CONFIG_GAMES_NAMES, fallback=None))
-        gamesRoles = split_config_list(self.config.get(guild, CONFIG_GAMES_ROLES, fallback=None))
+    async def lfg_match(self, ctx, *desc):
+        games, gamesNames, gamesRoles = self.get_configured_games(ctx.guild.id)
                 
         gameWanted = "game"
         if (desc[0] in games):
@@ -93,8 +83,15 @@ class matchmaking(commands.Cog):
         await messageSent.add_reaction("❌")
         await ctx.message.delete()
     
+    @commands.command(pass_context=True, brief="", name='lfg')
+    async def lfg(self, ctx, *desc):
+        if (desc[0] == "help"):
+            return await self.lfg_help(ctx)
+        else:
+            return await self.lfg_match(ctx, *desc)
+    
     @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload):
+    async def on_raw_reaction_add(self, payload): # Todo: refactor
         validEmojis = ["👍","🔔","❌"]
         
         if int(payload.user_id) == int(self.bot.user.id):
@@ -142,7 +139,7 @@ class matchmaking(commands.Cog):
                     
     
     @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload):
+    async def on_raw_reaction_remove(self, payload): # Todo: refactor
         validEmojis = ["👍"]
         
         if int(payload.user_id) == int(self.bot.user.id):
@@ -170,12 +167,7 @@ class matchmaking(commands.Cog):
                     embed = discord.Embed(description="Playing: "+message.content.split(" ")[0]+" "+" ".join(reactedMentions))
                     await message.edit(content=message.content,embed=embed)
     
-    def __init__(self, bot, config = None):
-        print("Matchmaking plugin started.")
-        self.bot = bot
-        self.config = config
-    
 def setup(bot):
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read('config/games.ini')
     bot.add_cog(matchmaking(bot, config))
