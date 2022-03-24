@@ -1,0 +1,86 @@
+[
+   {
+      "title":"Autumn",
+      "description":"You are in fall! Bears foraging in your territory be damned, you fear nothing. And with the dry air and all this fallen foliage, perfect kindling for to burn your adversaries!",
+      "category":"Map"
+   },
+   {
+      "title":"Winter",
+      "description":"You are in winter! You love cold feet, sticking your tongue on your steel blade just for the fun of it and look great sporting the silver fox look as your beard freezes",
+      "category":"Map"
+   },
+   {
+      "title":"Winter",
+      "description":"It’s winter, time for hot toddies and canoodling by the fire with your favorite book… oh wait clearly wrong game lol",
+      "category":"Map"
+   },
+   {
+      "title":"Winter",
+      "description":"It\"s winter in the forest! Run through the snowy fields and ford the frozen river as you attempt to rule the creatures of the wood!",
+      "category":"Map"
+   },
+   {
+      "title":"Lake",
+      "description":"A description for this map will come in time!",
+      "category":"Map"
+   },
+   {
+      "title":"Mountain",
+      "description":"A description for this map will come in time!",
+      "category":"Map"
+   },
+   {
+      "title":"Ranger",
+      "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-ranger.webp"},
+      "description":"You are ranger! Never mind the epithets of “murderwolf”. Go forth wanderlust rogue and trap some juicy hares!",
+      "category":"Vagabond"
+   },
+   {
+      "title":"Thief",
+      "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-thief.webp"},
+      "description":"You are thief! Go forth mysterious rogue! Pilfer what is rightfully yours and reap the rewards of magnanimity when you give it back to them.",
+      "category":"Vagabond"
+   },
+   {
+      "title":"Tinker",
+      "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-tinker.webp"},
+      "description":"You are tinker! Fair travels thwack tailed rogue! Never mind the groans from the crowd. We all know you have favor in the forest!",
+      "category":"Vagabond"
+   },
+   {
+      "title":"Vagrant",
+      "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-vagrant.webp"},
+      "description":"You are vagrant! Go forth and spread the “good” word! Don’t worry, they will believe you, they have no choice!",
+      "category":"Vagabond"
+   },
+   {
+      "title":"Arbiter",
+      "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-arbiter.webp"},
+      "description":"You are arbiter! Dig holes, scowl, silently pass judgment and cleave insolence.",
+      "category":"Vagabond"
+   },
+   {
+      "title":"Scoundrel",
+      "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-scoundrel.webp"},
+      "description":"You are scoundrel! Fare thee well masked avenger! Although no one, not even yourself quite knows what it is you hope to avenge.",
+      "category":"Vagabond"
+   },
+   {
+      "title":"Adventurer",
+      "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-adventurer.webp"},
+      "description":"This poor fellow doesn't have a funny description yet!",
+      "category":"Vagabond"
+   },
+   {
+      "title":"Ronin",
+      "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-ronin.webp"},
+      "description":"This poor fellow doesn't have a funny description yet!",
+      "category":"Vagabond"
+   },
+   {
+      "title":"Harrier",
+      "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-harrier.webp"},
+      "description":"This poor fellow doesn't have a funny description yet!",
+      "category":"Vagabond"
+   }
+]
