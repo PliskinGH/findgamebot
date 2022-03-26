@@ -2,21 +2,29 @@
    {
       "title":"Autumn",
       "description":"You are in fall! Bears foraging in your territory be damned, you fear nothing. And with the dry air and all this fallen foliage, perfect kindling for to burn your adversaries!",
+      "image": {"url": "https://i.imgur.com/6F0WjDY.jpg"},
+      "thumbnail": {"url": "https://i.imgur.com/kc1cb3n.jpg"},
       "category":"Map"
    },
    {
       "title":"Winter",
       "description":"You are in winter! You love cold feet, sticking your tongue on your steel blade just for the fun of it and look great sporting the silver fox look as your beard freezes",
+      "image": {"url": "https://i.imgur.com/Qig8W5n.jpg"},
+      "thumbnail": {"url": "https://i.imgur.com/13inxbU.jpg"},
       "category":"Map"
    },
    {
       "title":"Winter",
       "description":"It’s winter, time for hot toddies and canoodling by the fire with your favorite book… oh wait clearly wrong game lol",
+      "image": {"url": "https://i.imgur.com/Qig8W5n.jpg"},
+      "thumbnail": {"url": "https://i.imgur.com/13inxbU.jpg"},
       "category":"Map"
    },
    {
       "title":"Winter",
       "description":"It\"s winter in the forest! Run through the snowy fields and ford the frozen river as you attempt to rule the creatures of the wood!",
+      "image": {"url": "https://i.imgur.com/Qig8W5n.jpg"},
+      "thumbnail": {"url": "https://i.imgur.com/13inxbU.jpg"},
       "category":"Map"
    },
    {
@@ -32,55 +40,73 @@
    {
       "title":"Ranger",
       "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-ranger.webp"},
+      "thumbnail": {"url": "https://i.imgur.com/s9JfzHu.png"},
       "description":"You are ranger! Never mind the epithets of “murderwolf”. Go forth wanderlust rogue and trap some juicy hares!",
+      "color": 8948109,
       "category":"Vagabond"
    },
    {
       "title":"Thief",
       "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-thief.webp"},
+      "thumbnail": {"url": "https://root.seiyria.com/assets/bigicon/faction-vagabond1.png"},
       "description":"You are thief! Go forth mysterious rogue! Pilfer what is rightfully yours and reap the rewards of magnanimity when you give it back to them.",
+      "color": 16777215,
       "category":"Vagabond"
    },
    {
       "title":"Tinker",
       "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-tinker.webp"},
+      "thumbnail": {"url": "https://i.imgur.com/r2H0uBZ.png"},
       "description":"You are tinker! Fair travels thwack tailed rogue! Never mind the groans from the crowd. We all know you have favor in the forest!",
+      "color": 16051036,
       "category":"Vagabond"
    },
    {
       "title":"Vagrant",
       "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-vagrant.webp"},
+      "thumbnail": {"url": "https://i.imgur.com/UbrrFhi.png"},
       "description":"You are vagrant! Go forth and spread the “good” word! Don’t worry, they will believe you, they have no choice!",
+      "color": 14024787,
       "category":"Vagabond"
    },
    {
       "title":"Arbiter",
       "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-arbiter.webp"},
+      "thumbnail": {"url": "https://i.imgur.com/6zAPCrN.png"},
       "description":"You are arbiter! Dig holes, scowl, silently pass judgment and cleave insolence.",
+      "color": 13474,
       "category":"Vagabond"
    },
    {
       "title":"Scoundrel",
       "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-scoundrel.webp"},
+      "thumbnail": {"url": "https://i.imgur.com/VSRVj9M.png"},
       "description":"You are scoundrel! Fare thee well masked avenger! Although no one, not even yourself quite knows what it is you hope to avenge.",
+      "color": 16736258,
       "category":"Vagabond"
    },
    {
       "title":"Adventurer",
       "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-adventurer.webp"},
+      "thumbnail": {"url": "https://i.imgur.com/2rQ0LPY.png"},
       "description":"This poor fellow doesn't have a funny description yet!",
+      "color": 10901021,
       "category":"Vagabond"
    },
    {
       "title":"Ronin",
       "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-ronin.webp"},
+      "thumbnail": {"url": "https://root.seiyria.com/assets/bigicon/faction-vagabond2.png"},
       "description":"This poor fellow doesn't have a funny description yet!",
+      "color": 2303786,
       "category":"Vagabond"
    },
    {
       "title":"Harrier",
       "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-harrier.webp"},
+      "thumbnail": {"url": "https://i.imgur.com/urzikbD.png"},
       "description":"This poor fellow doesn't have a funny description yet!",
+      "color": 6672620,
       "category":"Vagabond"
    }
 ]

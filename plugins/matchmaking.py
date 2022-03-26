@@ -90,6 +90,45 @@ class matchmaking(commands.Cog):
         else:
             return await self.lfg_match(ctx, *desc)
     
+    @commands.command(pass_context=True, brief="", name='lfgv2')
+    async def lfg_v2(self, ctx, *desc):
+        games, gamesNames, gamesRoles = self.get_configured_games(ctx.guild.id)
+                
+        gameWanted = "Custom"
+        gameRole = ""
+        if (desc[0] in games):
+            index = games.index(desc[0])
+            if (len(gamesNames) == len(games) and len(gamesNames[index]) >= 1):
+                gameWanted = gamesNames[index]
+            if (len(gamesRoles) == len(games) and len(gamesRoles[index]) >= 1):
+                gameRole = gamesRoles[index]
+            desc = desc[1:]
+        
+        text = ""
+        if (len(desc)):
+            text += " ".join(desc) + "\n"
+        text += "For discussion about this game, please use a thread." 
+        embed = discord.Embed(description=text)
+        
+        if (len(gameRole)):
+            embed.add_field(name="Target", value=gameRole, inline=True)
+        
+        field_text = ctx.message.author.mention
+        embed.add_field(name="Player 1", value=field_text, inline=True)
+        
+        embed.set_author(name=ctx.message.author.name,
+                         icon_url=str(ctx.message.author.avatar_url))
+        embed.title = "Looking for a " + gameWanted + " Game"
+        embed.set_thumbnail(url=str(ctx.message.author.avatar_url))
+        embed.colour = ctx.message.author.colour
+        
+        messageSent = await ctx.send(embed=embed)
+
+        await messageSent.add_reaction("👍")
+        await messageSent.add_reaction("🔔")
+        await messageSent.add_reaction("❌")
+        await ctx.message.delete()
+    
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload): # Todo: refactor
         validEmojis = ["👍","🔔","❌"]

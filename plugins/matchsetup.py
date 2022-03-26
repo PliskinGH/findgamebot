@@ -71,7 +71,8 @@ class matchsetup(commands.Cog):
         if ("title" in desc and "category" in desc):
             embed.title = "Random " + desc["category"] + ": " + desc["title"]
         
-        embed.colour = discord.Colour.random()
+        if ("color" not in desc):
+            embed.colour = discord.Colour.random()
         
         await ctx.send(embed=embed)
         
