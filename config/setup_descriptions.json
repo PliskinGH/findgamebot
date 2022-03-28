@@ -1,7 +1,7 @@
 [
    {
       "title":"Autumn",
-      "description":"You are in fall! Bears foraging in your territory be damned, you fear nothing. And with the dry air and all this fallen foliage, perfect kindling for to burn your adversaries!",
+      "description":"You are in fall! Bears foraging in your territory bedamned, you fear nothing. And with the dry air and all this fallen foliage, perfect kindling for to burn your adversaries!",
       "image": {"url": "https://i.imgur.com/6F0WjDY.jpg"},
       "thumbnail": {"url": "https://i.imgur.com/kc1cb3n.jpg"},
       "color": 14520159,
@@ -9,7 +9,7 @@
    },
    {
       "title":"Winter",
-      "description":"You are in winter! You love cold feet, sticking your tongue on your steel blade just for the fun of it and look great sporting the silver fox look as your beard freezes",
+      "description":"You are in winter! You love cold feet, sticking your tongue on your steel blade just for the fun of it and look great sporting the silver fox look as your beard freezes.",
       "image": {"url": "https://i.imgur.com/Qig8W5n.jpg"},
       "thumbnail": {"url": "https://i.imgur.com/13inxbU.jpg"},
       "color": 16514303,
@@ -17,7 +17,7 @@
    },
    {
       "title":"Winter",
-      "description":"It’s winter, time for hot toddies and canoodling by the fire with your favorite book… oh wait clearly wrong game lol",
+      "description":"It’s winter, time for hot toddies and canoodling by the fire with your favorite book… oh wait clearly wrong game....",
       "image": {"url": "https://i.imgur.com/Qig8W5n.jpg"},
       "thumbnail": {"url": "https://i.imgur.com/13inxbU.jpg"},
       "color": 16514303,
@@ -25,7 +25,7 @@
    },
    {
       "title":"Winter",
-      "description":"It\"s winter in the forest! Run through the snowy fields and ford the frozen river as you attempt to rule the creatures of the wood!",
+      "description":"It’s winter in the forest! Run through the snowy fields and ford the frozen river as you attempt to rule the creatures of the wood!",
       "image": {"url": "https://i.imgur.com/Qig8W5n.jpg"},
       "thumbnail": {"url": "https://i.imgur.com/13inxbU.jpg"},
       "color": 16514303,
@@ -33,13 +33,13 @@
    },
    {
       "title":"Lake",
-      "description":"A description for this map will come in time!",
+      "description":"You are at the lake! Ah! Fresh air! A little boating and some fishing. Just the thing to keep your mind off those whispering bubbles—your adversaries last gasps of air as they sink to the bottom with your prize rock collection.",
       "color": 1752220,
       "category":"Map"
    },
    {
       "title":"Mountain",
-      "description":"A description for this map will come in time!",
+      "description":"You are on the mountain! Surely one cannot rule the land until they are king of the mountain. Reach the summit, show your prowess, let the plebs gasp at your mighty tree fort.",
       "color": 12745742,
       "category":"Map"
    },
@@ -95,7 +95,7 @@
       "title":"Adventurer",
       "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-adventurer.webp"},
       "thumbnail": {"url": "https://i.imgur.com/2rQ0LPY.png"},
-      "description":"This poor fellow doesn't have a funny description yet!",
+      "description":"You are adventurer! Your parents never understood your fascination with breaking your toys. Luckily sly uncle MacGyver got it and reared you into the resourceful raptor you are now. Go forth and plunge square pegs in round holes!",
       "color": 10901021,
       "category":"Vagabond"
    },
@@ -103,7 +103,7 @@
       "title":"Ronin",
       "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-ronin.webp"},
       "thumbnail": {"url": "https://root.seiyria.com/assets/bigicon/faction-vagabond2.png"},
-      "description":"This poor fellow doesn't have a funny description yet!",
+      "description":"You are ronin! Your honor—since they board wiped your last retainer—in tatters. Masterless , coalitionless, you seek only infamy now and somehow feel compelled to grumble everything in gruff, angry tones...like cursing with a mouth full of cookies.",
       "color": 2303786,
       "category":"Vagabond"
    },
@@ -111,7 +111,7 @@
       "title":"Harrier",
       "image": {"url": "https://rootcards.seiyria.com/assets/cards/vagabond-harrier.webp"},
       "thumbnail": {"url": "https://i.imgur.com/urzikbD.png"},
-      "description":"This poor fellow doesn't have a funny description yet!",
+      "description":"You are harrier! Something happened that late night in the oak tree when ol’ Grandpa Bushy reduced the acorns in root tea a little too richly. Watching him vanish into thin air, you decided to sip the family elixir. And just like that, your wanderlust life of adventure unfurled before your glazed eyes!",
       "color": 6672620,
       "category":"Vagabond"
    }
