@@ -2,14 +2,10 @@ import discord
 from discord.ext import commands
 import configparser
 
-CONFIG_DEFAULT = "DEFAULT"
-CONFIG_ID = "ID"
+from utils import common
 CONFIG_GAMES_COMMANDS = "GamesCommands"
 CONFIG_GAMES_NAMES = "GamesFullNames"
 CONFIG_GAMES_ROLES = "GamesRoles"
-
-def split_config_list(value):
-    return [x.strip() for x in value.split(',')]
 
 class matchmaking(commands.Cog):
     
@@ -23,17 +19,11 @@ class matchmaking(commands.Cog):
         gamesNames = []
         gamesRoles = []
         
-        for guild in self.config.sections():
-            found = (guild_id == self.config.getint(guild, CONFIG_ID, fallback=None))
-            if (found):
-                break
+        guild = common.get_guild_from_config(self.config, guild_id)
         
-        if (not(found)):
-            guild = CONFIG_DEFAULT
-        
-        games = split_config_list(self.config.get(guild, CONFIG_GAMES_COMMANDS, fallback=None))
-        gamesNames = split_config_list(self.config.get(guild, CONFIG_GAMES_NAMES, fallback=None))
-        gamesRoles = split_config_list(self.config.get(guild, CONFIG_GAMES_ROLES, fallback=None))
+        games = common.split_config_list(self.config.get(guild, CONFIG_GAMES_COMMANDS, fallback=None))
+        gamesNames = common.split_config_list(self.config.get(guild, CONFIG_GAMES_NAMES, fallback=None))
+        gamesRoles = common.split_config_list(self.config.get(guild, CONFIG_GAMES_ROLES, fallback=None))
         
         return (games, gamesNames, gamesRoles)
     
@@ -128,53 +118,59 @@ class matchmaking(commands.Cog):
         await messageSent.add_reaction("🔔")
         await messageSent.add_reaction("❌")
         await ctx.message.delete()
+        
+    async def refresh_message_embed(self, message, user, emoji, notify=True):
+        return
+        
+    async def refresh_message(self, message, user, emoji, notify=True):
+        if str(emoji.name) == "👍":
+            reactedMentions = []
+            for messageReaction in message.reactions:
+                if str(messageReaction) == "👍":
+                    reactedUsers = await messageReaction.users().flatten()
+                    for reactedUser in reactedUsers:
+                        if not reactedUser.id == self.bot.user.id:
+                            reactedMentions.append(reactedUser.mention)
+                        
+            embed = discord.Embed(description="Playing: "+message.content.split(" ")[0]+" "+" ".join(reactedMentions))
+            await message.edit(content=message.content,embed=embed)
+            for messageReaction in message.reactions:
+                if str(messageReaction) == "🔔":
+                    reactedUsers = await messageReaction.users().flatten()
+                    for userToDm in reactedUsers:
+                        if not userToDm.id == self.bot.user.id:
+                            try:
+                                await userToDm.send("A new user has joined your Root game! Head to the LFG Channel to say hello.")
+                            except:
+                                print("Failed to DM "+str(userToDm))
+            
+        if str(emoji.name) == "❌":
+            if user.mention == message.content.split(" ")[0]:
+                await message.edit(content="Game closed/full. Sorry!")
+            else:
+                print("Not game creator, cannot close.")
     
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload): # Todo: refactor
-        validEmojis = ["👍","🔔","❌"]
+        validEmojis = ["👍","❌"]
         
         if int(payload.user_id) == int(self.bot.user.id):
             return False
         
         if str(payload.emoji.name) in validEmojis:
+            user = self.bot.get_user(int(payload.user_id))
             channel = self.bot.get_channel(int(payload.channel_id))
             message = await channel.fetch_message(int(payload.message_id))
             if (message.author.id != self.bot.user.id):
                 return False
             
-            #print(" ".join((message.content.split(" ")[1:])))
-            if " ".join((message.content.split(" ")[1:])).startswith("is looking for a "):
-                #print("Matches msg")
-                #messageEmbed = message.embeds[0]
-                if str(payload.emoji.name) == "👍":
-                    reactedMentions = []
-                    for messageReaction in message.reactions:
-                        if str(messageReaction) == "👍":
-                            reactedUsers = await messageReaction.users().flatten()
-                            for reactedUser in reactedUsers:
-                                if not reactedUser.id == self.bot.user.id:
-                                    reactedMentions.append(reactedUser.mention)
-                                
-                    embed = discord.Embed(description="Playing: "+message.content.split(" ")[0]+" "+" ".join(reactedMentions))
-                    await message.edit(content=message.content,embed=embed)
-                    for messageReaction in message.reactions:
-                        if str(messageReaction) == "🔔":
-                            reactedUsers = await messageReaction.users().flatten()
-                            for userToDm in reactedUsers:
-                                if not userToDm.id == self.bot.user.id:
-                                    try:
-                                        await userToDm.send("A new user has joined your Root game! Head to the LFG Channel to say hello.")
-                                    except:
-                                        print("Failed to DM "+str(userToDm))
-                    
-                if str(payload.emoji.name) == "❌":
-                    if int(payload.user_id) == int(self.bot.user.id):
-                        return False
-                    currentReacter = channel.guild.get_member(int(payload.user_id))
-                    if currentReacter.mention == message.content.split(" ")[0]:
-                        await message.edit(content="Game closed/full. Sorry!")
-                    else:
-                        print("Not game creator, cannot close.")
+            title = ""
+            if (len(message.embeds)):
+                title = str(message.embeds[0].title)
+            if (title.startswith("Looking for a")):
+                return await self.refresh_message_embed(message, user, payload.emoji)
+            elif (" ".join((message.content.split(" ")[1:])).startswith("is looking for a ")):
+                return await self.refresh_message(message, user, payload.emoji)
                     
     
     @commands.Cog.listener()
@@ -185,26 +181,14 @@ class matchmaking(commands.Cog):
             return False
         
         if str(payload.emoji.name) in validEmojis:
+            user = self.bot.get_user(int(payload.user_id))
             channel = self.bot.get_channel(int(payload.channel_id))
             message = await channel.fetch_message(int(payload.message_id))
             if (message.author.id != self.bot.user.id):
                 return False
             
-            #print(" ".join((message.content.split(" ")[1:])))
             if " ".join((message.content.split(" ")[1:])).startswith("is looking for a "):
-                #print("Matches msg")
-                #messageEmbed = message.embeds[0]
-                if str(payload.emoji.name) == "👍":
-                    reactedMentions = []
-                    for messageReaction in message.reactions:
-                        if str(messageReaction) == "👍":
-                            reactedUsers = await messageReaction.users().flatten()
-                            for reactedUser in reactedUsers:
-                                if not reactedUser.id == self.bot.user.id:
-                                    reactedMentions.append(reactedUser.mention)
-                                
-                    embed = discord.Embed(description="Playing: "+message.content.split(" ")[0]+" "+" ".join(reactedMentions))
-                    await message.edit(content=message.content,embed=embed)
+                return await self.refresh_message(message, user, payload.emoji, notify=False)
     
 def setup(bot):
     config = configparser.ConfigParser()

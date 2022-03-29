@@ -10,9 +10,9 @@ import discord
 from discord.ext import commands
 import configparser
 import json
+import re
 
-def split_config_list(value):
-    return [x.strip() for x in value.split(',')]
+from utils import common
 
 class matchsetup(commands.Cog):
     
@@ -22,62 +22,68 @@ class matchsetup(commands.Cog):
         self.config = config
         self.desc = desc
         
-    def parse_command(self, args):
+    def parse_command(self, args, guild):
         option = ""
         value_index = 0
         for arg in args:
             value_index += 1
-            if (len(arg) > 1 and arg[0] == '-'):
-                option = arg[1:]
+            if (arg.isalpha() and arg.islower()):
+                option = arg
                 break
         
-        value = ""
-        next_args = []
-        if (value_index < len(args)):
-            next_arg = args[value_index]
-            if (len(next_arg) and next_arg[0] != '-'):
-                value = next_arg
-                next_args = args[value_index+1:]
-            else:
-                next_args = args[value_index:]
-        
-        return option, value, next_args
-    
-    @commands.command(brief="", name='setup')
-    async def setup(self, ctx, *args):
-        option, value, left_args = self.parse_command(args)
-        
-        choice = ""
-        choices = split_config_list(self.config.get("DEFAULT", option, fallback=None))
+        choices = common.split_config_list(self.config.get(guild, option, fallback=None))
         cardinal = len(choices)
         
-        if (len(value)):
-            value = int(value)
-        else:
-            value = 0
-        if (value <= 0 or value > cardinal):
-            value = cardinal
-        if (value > 0):
-            choice = choices[random.randint(0, value-1)]
+        value_list = []
+        next_args = []
+        subset_choices = []
+        if (value_index < len(args)):
+            next_arg = args[value_index]
+            value_list = common.parse_intervals(next_arg, cardinal)
         
-        dicts = [ _dict for _dict in self.desc
-                 if ("title" in _dict and _dict["title"] == choice) ]
-        nb_desc = len(dicts)
+        if (len(value_list)):
+            next_args = args[value_index+1:]
+            subset_choices = [choices[i-1] for i in value_list]
+        else:
+            next_args = args[value_index:]
+            subset_choices = choices
+        
+        return option, subset_choices, next_args
+    
+    @commands.command(brief="", name='random')
+    async def random(self, ctx, *args):
+        guild = common.get_guild_from_config(self.config, ctx.guild.id)
+        
+        choice = ""
+        option, choices, left_args = self.parse_command(args, guild)
+        
+        if (len(choices)):
+            choice = random.choice(choices)
+            footer_text = "Randomly chosen among: "+ ", ".join(choices) + "."
+        
+        nb_desc = 0
+        if (len(choice)):
+            dicts = [ _dict for _dict in self.desc
+                      if ("title" in _dict and _dict["title"] == choice) ]
+            nb_desc = len(dicts)
         desc = {}
         if (nb_desc >= 1):
-            desc = dicts[random.randint(0, nb_desc-1)]
+            desc = dicts[random.randrange(0, nb_desc)]
         
-        embed = discord.Embed.from_dict(desc)
-        if ("title" in desc and "category" in desc):
-            embed.title = "Random " + desc["category"] + ": " + desc["title"]
+        if (len(desc)):
+            embed = discord.Embed.from_dict(desc)
         
-        if ("color" not in desc):
-            embed.colour = discord.Colour.random()
-        
-        await ctx.send(embed=embed)
+            if ("color" not in desc):
+                embed.colour = discord.Colour.random()
+            
+            if ("title" in desc):
+                if ("category" in desc):
+                    embed.title = "Random " + desc["category"] + ": " + desc["title"]
+                embed.set_footer(text=footer_text)
+                await ctx.send(embed=embed)
         
         if (len(left_args)):
-            await self.setup(ctx, *left_args)
+            await self.random(ctx, *left_args)
     
 def setup(bot):
     config = configparser.ConfigParser()
