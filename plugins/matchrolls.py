@@ -10,14 +10,13 @@ import discord
 from discord.ext import commands
 import configparser
 import json
-import re
 
 from utils import common
 
-class matchsetup(commands.Cog):
+class matchrolls(commands.Cog):
     
     def __init__(self, bot, config = None, desc = None):
-        print("Match setup plugin started.")
+        print("Match rolls plugin started.")
         self.bot = bot
         self.config = config
         self.desc = desc
@@ -87,10 +86,10 @@ class matchsetup(commands.Cog):
     
 def setup(bot):
     config = configparser.ConfigParser()
-    config.read('config/setup.ini')
+    config.read('config/rolls.ini')
     
-    json_file = open('config/setup_descriptions.json', encoding="utf8")
+    json_file = open('config/rolls_descriptions.json', encoding="utf8")
     desc = json.load(json_file)
     json_file.close()
     
-    bot.add_cog(matchsetup(bot, config, desc))
+    bot.add_cog(matchrolls(bot, config, desc))

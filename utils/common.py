@@ -54,3 +54,10 @@ def parse_intervals(string, cardinal):
                     value_list.append(i)
     
     return value_list
+
+def indefinite_article(word):
+    article = "a"
+    vowels = ['a', 'A', 'e', 'E', 'i', 'I', 'o', 'O', 'u', 'U']
+    if (len(word) and word[0] in vowels):
+        article = "an"
+    return article

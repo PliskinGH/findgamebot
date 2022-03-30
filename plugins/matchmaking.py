@@ -29,19 +29,22 @@ class matchmaking(commands.Cog):
     
     async def lfg_help(self, ctx):
         text = "Syntax:\n"
-        text += "!lfg <game> <description> where <game> is a game available on the server with a corresponding role to ping.\n"
+        text += "`!lfg <game> <description>` where `<game>` is a game available on the server with a corresponding role to ping.\n"
         text += "or\n"
-        text += "!lfg <description> for a custom game (no automatic ping).\n"
+        text += "`!lfg <description>` for a custom game (no automatic ping).\n"
         
         games, gamesNames, _ = self.get_configured_games(ctx.guild.id)
         
         commands_list = []
+        align = len(max(games, key=len))
         for game in games:
             index = games.index(game)
-            command_text = " • "
+            command_text = "• `"
             command_text += game
-            if (len(gamesNames) == len(games) and len(gamesNames[index]) >= 1):
-                command_text += " : Looking for a "
+            command_text += " " * (align-len(game)) + "`"
+            if (len(gamesNames) == len(games) and len(gamesNames[index])):
+                command_text += " : Looking for "
+                command_text += common.indefinite_article(gamesNames[index]) + " "
                 command_text += "**" + gamesNames[index] + "** game."
             command_text += "\n"
             commands_list.append(command_text)
@@ -57,14 +60,17 @@ class matchmaking(commands.Cog):
         gameWanted = "game"
         if (desc[0] in games):
             index = games.index(desc[0])
-            if (len(gamesNames) == len(games) and len(gamesNames[index]) >= 1):
+            if (len(gamesNames) == len(games) and len(gamesNames[index])):
                 gameWanted = "**" + gamesNames[index] + "** " + gameWanted
-            if (len(gamesRoles) == len(games) and len(gamesRoles[index]) >= 1):
+            if (len(gamesRoles) == len(games) and len(gamesRoles[index])):
                 gameWanted += " (" + gamesRoles[index] + ")"
             desc = desc[1:]
         
         embed = discord.Embed(description="Playing: "+ctx.message.author.mention)
-        text = ctx.message.author.mention+" is looking for a "+gameWanted+" with: " +" ".join(desc)+"\n For discussion about this game, please use a thread."
+        text = ctx.message.author.mention + " is looking for "
+        text += common.indefinite_article(gamesNames[index]) + " "
+        text += gameWanted + " with: " + " ".join(desc)
+        text += "\n For discussion about this game, please use a thread."
         
         messageSent = await ctx.send(text,embed=embed)
 
@@ -84,7 +90,7 @@ class matchmaking(commands.Cog):
     async def lfg_v2(self, ctx, *desc):
         games, gamesNames, gamesRoles = self.get_configured_games(ctx.guild.id)
                 
-        gameWanted = "Custom"
+        gameWanted = "custom"
         gameRole = ""
         if (desc[0] in games):
             index = games.index(desc[0])
@@ -108,7 +114,9 @@ class matchmaking(commands.Cog):
         
         embed.set_author(name=ctx.message.author.name,
                          icon_url=str(ctx.message.author.avatar_url))
-        embed.title = "Looking for a " + gameWanted + " Game"
+        embed.title = "Looking for " 
+        embed.title += common.indefinite_article(gameWanted)
+        embed.title += " " + gameWanted + " game"
         embed.set_thumbnail(url=str(ctx.message.author.avatar_url))
         embed.colour = ctx.message.author.colour
         
