@@ -116,5 +116,47 @@
       "description":"You are harrier! Something happened that late night in the oak tree when ol’ Grandpa Bushy reduced the acorns in root tea a little too richly. Watching him vanish into thin air, you decided to sip the family elixir. And just like that, your wanderlust life of adventure unfurled before your glazed eyes!",
       "color": 6672620,
       "category":"Vagabond"
+   },
+   {
+      "title":"Elder Treetop",
+      "thumbnail": {"url": "https://i.imgur.com/rEexphg.png"},
+      "description":"Enables an extra building space.\n Removing an enemy building from the Treetop scores the player **2VP**. *Instead of just 1.*",
+      "color": 6275410,
+      "category":"Landmark"
+   },
+   {
+      "title":"Lost City",
+      "thumbnail": {"url": "https://i.imgur.com/gnPvPuo.png"},
+      "description":"The clearing with the Lost city counts as all suits for all purposes.\n *A crafting piece with the Lost City will provide any symbol once.*",
+      "color": 11493162,
+      "category":"Landmark"
+   },
+   {
+      "title":"Black Market",
+      "thumbnail": {"url": "https://i.imgur.com/OTWDAQ8.png"},
+      "description":"Once per turn, if a player has a piece in the clearing with The Black Market, they may swap one of their cards in hand face-down with a carde here.",
+      "color": 7230253,
+      "category":"Landmark"
+   },
+   {
+      "title":"Legendary Forge",
+      "thumbnail": {"url": "https://i.imgur.com/5dKCPPf.png"},
+      "description":"Items on this card can only be crafted by using atleast one crafting piece in the clearing with the Legendary Forge.\n *Item card required as well.*\n When you craft an item from this card, gain **+1VP** and draw a card.",
+      "color": 14206355,
+      "category":"Landmark"
+   },
+   {
+      "title":"The Ferry",
+      "thumbnail": {"url": "https://i.imgur.com/UUA9B5m.png"},
+      "description":"Once per turn, a player taking a move from the clearing with the ferry can move to an adjacent clearing with the river, moving the ferry as well.\n *(This follows the normal move rules.)*\n After taking this move, that player draws one card.",
+      "color": 11427369,
+      "category":"Landmark"
+   },
+   {
+      "title":"The Tower",
+      "thumbnail": {"url": "https://i.imgur.com/ONWFUrV.png"},
+      "description":"At the end of a player's Evening, if that player rules the clearing with The Tower, that player scores **1VP**.",
+      "color": 5127742,
+      "category":"Landmark"
    }
 ]

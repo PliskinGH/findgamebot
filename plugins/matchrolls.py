@@ -58,7 +58,7 @@ class matchrolls(commands.Cog):
         
         if (len(choices)):
             choice = random.choice(choices)
-            footer_text = "Randomly chosen among: "+ ", ".join(choices) + "."
+            footer_text = "Randomly chosen among: " + ", ".join(choices) + "."
         
         nb_desc = 0
         if (len(choice)):
