@@ -134,7 +134,7 @@
    {
       "title":"Black Market",
       "thumbnail": {"url": "https://i.imgur.com/OTWDAQ8.png"},
-      "description":"Once per turn, if a player has a piece in the clearing with The Black Market, they may swap one of their cards in hand face-down with a carde here.",
+      "description":"Once per turn, if a player has a piece in the clearing with The Black Market, they may swap one of their cards in hand face-down with a card here.",
       "color": 7230253,
       "category":"Landmark"
    },

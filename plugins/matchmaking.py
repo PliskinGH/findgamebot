@@ -29,9 +29,11 @@ class matchmaking(commands.Cog):
     
     async def lfg_help(self, ctx):
         text = "Syntax:\n"
-        text += "`!lfg <game> <description>` where `<game>` is a game available on the server with a corresponding role to ping.\n"
+        text += "`" + ctx.prefix
+        text += "lfg <game> <description>` where `<game>` is a game available on the server with a corresponding role to ping.\n"
         text += "or\n"
-        text += "`!lfg <description>` for a custom game (no automatic ping).\n"
+        text += "`" + ctx.prefix
+        text += "lfg <description>` for a custom game (no automatic ping).\n"
         
         games, gamesNames, _ = self.get_configured_games(ctx.guild.id)
         
@@ -50,7 +52,7 @@ class matchmaking(commands.Cog):
             commands_list.append(command_text)
         
         embed = discord.Embed(description="".join(commands_list))
-        text += "Games available on your server:\n"
+        text += "\nGames available on your server:\n"
         
         await ctx.send(text,embed=embed)
         
@@ -81,7 +83,7 @@ class matchmaking(commands.Cog):
     
     @commands.command(pass_context=True, brief="", name='lfg')
     async def lfg(self, ctx, *desc):
-        if (desc[0] == "help"):
+        if (desc[0] == common.HELP_COMMAND):
             return await self.lfg_help(ctx)
         else:
             return await self.lfg_match(ctx, *desc)

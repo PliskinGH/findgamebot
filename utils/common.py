@@ -10,6 +10,8 @@ import re
 CONFIG_DEFAULT = "DEFAULT"
 CONFIG_ID = "ID"
 
+HELP_COMMAND = "help"
+
 def split_config_list(value):
     return [x.strip() for x in value.split(',')]
 

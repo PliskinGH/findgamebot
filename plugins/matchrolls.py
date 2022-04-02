@@ -20,6 +20,35 @@ class matchrolls(commands.Cog):
         self.bot = bot
         self.config = config
         self.desc = desc
+    
+    async def random_help(self, ctx):
+        text = "Syntax:\n"
+        text += "`" + ctx.prefix
+        text += "random <category> [<number> / <subset>]` where `<category>` is a type of set to roll from.\n"
+        text += "Example of subsets:\n"
+        text += "`" + ctx.prefix
+        text += "random <category> 6` to roll from the first 6 items in the set.\n"
+        text += "`" + ctx.prefix
+        text += "random <category> 2,5-9` to roll from the second and 5th to 9th items.\n"
+        
+        guild = common.get_guild_from_config(self.config, ctx.guild.id)
+        
+        sets = self.config.items(guild)
+        rolls_list = []
+        align = len(max([cat for cat, rollset in sets], key=len))
+        for cat, rollset in sets:
+            roll_text = "• `"
+            roll_text += str(cat)
+            roll_text += " " * (align-len(str(cat))) + "`"
+            if (len(rollset)):
+                roll_text += " : " + str(rollset) + "."
+            roll_text += "\n"
+            rolls_list.append(roll_text)
+        
+        embed = discord.Embed(description="".join(rolls_list))
+        text += "\nSets available on your server:\n"
+        
+        await ctx.send(text,embed=embed)
         
     def parse_command(self, args, guild):
         option = ""
@@ -51,6 +80,9 @@ class matchrolls(commands.Cog):
     
     @commands.command(brief="", name='random')
     async def random(self, ctx, *args):
+        if (len(args) and args[0] == common.HELP_COMMAND):
+            return await self.random_help(ctx)
+        
         guild = common.get_guild_from_config(self.config, ctx.guild.id)
         
         choice = ""
