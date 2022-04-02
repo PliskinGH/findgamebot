@@ -15,8 +15,7 @@ PREFIX = os.getenv('COMMAND_PREFIX')
 if (PREFIX is None):
     PREFIX = "!"
 
-intents = discord.Intents.default()
-intents.members = True
+intents = discord.Intents.all()
 
 bot = commands.Bot(command_prefix=str(PREFIX), case_insensitive=True, \
                    heartbeat_timeout=300, intents=intents, \
@@ -51,9 +50,6 @@ def run_client(token):
         loadPlugins()
         
         bot.run(token)
-            
-        for plugin in bot.extensions:
-            plugin.unload()
             
         print("Restarting in 60 seconds")
         time.sleep(60)
