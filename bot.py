@@ -4,7 +4,6 @@ from discord.ext import commands
 import os
 from os.path import isfile, join
 import traceback
-import time
 import datetime
 from dotenv import load_dotenv
 
@@ -16,12 +15,12 @@ if (PREFIX is None):
     PREFIX = "!"
 
 intents = discord.Intents.all()
+    
+cogs_dir = "plugins"
 
 bot = commands.Bot(command_prefix=str(PREFIX), case_insensitive=True, \
                    heartbeat_timeout=300, intents=intents, \
                    help_command=None)
-    
-cogs_dir = "plugins"
 
 @bot.event
 async def on_ready():
@@ -33,29 +32,7 @@ async def on_ready():
 
 @bot.event
 async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandNotFound):
-        pass
-    elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("Invalid syntax")
-    elif isinstance(error, commands.BadArgument):
-        await ctx.send("Invalid syntax")
-    else:
-        print(error, ctx)
-
-def run_client(token):
-    global bot
-    
-    while True:
-        print("Starting at time",str(datetime.datetime.now()))
-        loadPlugins()
-        
-        bot.run(token)
-            
-        print("Restarting in 60 seconds")
-        time.sleep(60)
-        bot = commands.Bot(command_prefix=str(PREFIX), \
-                           case_insensitive=True, heartbeat_timeout=300, \
-                           intents=intents, help_command=None)
+    print(error, ctx)
 
 def loadPlugins():
     activadedPlugins = []
@@ -71,9 +48,12 @@ def loadPlugins():
                     bot.load_extension(cogs_dir + "." + extension[:-3])
                 else:
                     print(str(extension[:-3])," disabled")
-        except Exception as e:
+        except Exception:
             print('Failed to load extension {extension}.')
             traceback.print_exc()
     
 if __name__ == "__main__":
-    run_client(TOKEN)
+    print("Starting at time",str(datetime.datetime.now()))
+    loadPlugins()
+    
+    bot.run(TOKEN)

@@ -13,6 +13,8 @@ CONFIG_ID = "ID"
 HELP_COMMAND = "help"
 
 def split_config_list(value):
+    if (value is None):
+        return []
     return [x.strip() for x in value.split(',')]
 
 def get_guild_from_config(config, guild_id):
@@ -63,3 +65,8 @@ def indefinite_article(word):
     if (len(word) and word[0] in vowels):
         article = "an"
     return article
+
+def get_default_emoji_url(emoji):
+    emoji_id = ord(emoji[0])
+    url = f"https://twemoji.maxcdn.com/v/latest/72x72/{emoji_id:x}.png"
+    return url
