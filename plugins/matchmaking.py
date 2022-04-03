@@ -28,7 +28,7 @@ class matchmaking(commands.Cog):
         # self.refresh_threads.start()
         
     def cog_unload(self):
-        self.refresh_threads.cancel()
+        # self.refresh_threads.cancel()
         super().cog_unload()
     
     def get_configured_games(self, guild_id, *args):
@@ -81,40 +81,13 @@ class matchmaking(commands.Cog):
         text += "\nGames available on your server:\n"
         
         await ctx.send(text,embed=embed)
-        
-    async def lfg_match(self, ctx, *desc):
-        games, gamesNames, gamesRoles= self.get_configured_games(ctx.guild.id, CONFIG_GAMES_COMMANDS, CONFIG_GAMES_NAMES, CONFIG_GAMES_ROLES)
-                
-        gameWanted = "game"
-        article = "a"
-        if (desc[0] in games):
-            index = games.index(desc[0])
-            if (len(gamesNames) == len(games) and len(gamesNames[index])):
-                gameWanted = "**" + gamesNames[index] + "** " + gameWanted
-            if (len(gamesRoles) == len(games) and len(gamesRoles[index])):
-                gameWanted += " (" + gamesRoles[index] + ")"
-            desc = desc[1:]
-            article = common.indefinite_article(gamesNames[index])
-        
-        embed = discord.Embed(description="Playing: "+ctx.message.author.mention)
-        text = ctx.message.author.mention + " is looking for "
-        text += article + " "
-        text += gameWanted + " with: " + " ".join(desc)
-        text += "\n For discussion about this game, please use a thread."
-        
-        messageSent = await ctx.send(text,embed=embed)
-
-        await messageSent.add_reaction("👍")
-        await messageSent.add_reaction("🔔")
-        await messageSent.add_reaction("❌")
-        await ctx.message.delete()
     
     @commands.command()
     async def lfg(self, ctx, *desc):
-        if (desc[0] == common.HELP_COMMAND):
+        if (not(len(desc)) or desc[0] == common.HELP_COMMAND):
             return await self.lfg_help(ctx)
         else:
-            return await self.lfg_match(ctx, *desc)
+            return await self.lfg_v2(ctx, *desc)
     
     @commands.command()
     async def lfg_v2(self, ctx, *desc):
@@ -127,7 +100,7 @@ class matchmaking(commands.Cog):
         gameRole = ""
         gameIcon = ""
         gameColor = ""
-        if (desc[0] in games):
+        if (len(desc) and desc[0] in games):
             index = games.index(desc[0])
             if (len(gamesNames) == len(games) and len(gamesNames[index])):
                 gameWanted = gamesNames[index]
@@ -178,8 +151,11 @@ class matchmaking(commands.Cog):
         embed.colour = gameColor
         
         try:
-            bot_message = await ctx.send(content=gameRole)
-            await bot_message.edit(content="", embed=embed)
+            if (len(gameRole)):
+                bot_message = await ctx.send(content=gameRole)
+                await bot_message.edit(content="", embed=embed)
+            else:
+                bot_message = await ctx.send(content="", embed=embed)
             await bot_message.add_reaction(EMOJI_JOIN)
             await bot_message.add_reaction(EMOJI_NOTIFY)
             await bot_message.add_reaction(EMOJI_CLOSE)
@@ -213,24 +189,31 @@ class matchmaking(commands.Cog):
             return False
             
         embed = message.embeds[0]
+        
+        
         fields = embed.fields
         host = ""
         for field in fields:
             if (field.name == "Host"):
                 host = field.value
                 break
+        if (not(len(message.reactions))):
+            return False # Game already closed, reactions cleaned
         
+        players = []
+        users_to_notify = []
+        for reaction in message.reactions:
+            reaction_users = await reaction.users().flatten()
+            if ((self.bot.user not in reaction_users) \
+                and (str(reaction) in EMOJIS_VALID)):
+                return False # Game already closed, reactions cleaned
+            reaction_users.remove(self.bot.user)
+            if str(reaction) == EMOJI_JOIN:
+                players = reaction_users
+            if str(reaction) == EMOJI_NOTIFY:
+                users_to_notify = reaction_users
+
         if (str(payload.emoji.name) == EMOJI_JOIN):
-            players = []
-            users_to_notify = []
-            for reaction in message.reactions:
-                reaction_users = await reaction.users().flatten()
-                reaction_users.remove(self.bot.user)
-                if str(reaction) == EMOJI_JOIN:
-                    players = reaction_users
-                if str(reaction) == EMOJI_NOTIFY:
-                    users_to_notify = reaction_users
-            
             embed.clear_fields()
             number = 1
             for field in fields:
@@ -281,69 +264,6 @@ class matchmaking(commands.Cog):
             # except Exception as e:
             #     print(e)
             # print(self.threads)
-        
-    async def refresh_message(self, message, user, emoji, notify=True):
-        if str(emoji.name) == "👍":
-            reactedMentions = []
-            for messageReaction in message.reactions:
-                if str(messageReaction) == "👍":
-                    reactedUsers = await messageReaction.users().flatten()
-                    for reactedUser in reactedUsers:
-                        if not reactedUser.id == self.bot.user.id:
-                            reactedMentions.append(reactedUser.mention)
-                        
-            embed = discord.Embed(description="Playing: "+message.content.split(" ")[0]+" "+" ".join(reactedMentions))
-            await message.edit(content=message.content,embed=embed)
-            
-            if (notify):
-                for messageReaction in message.reactions:
-                    if str(messageReaction) == "🔔":
-                        reactedUsers = await messageReaction.users().flatten()
-                        for userToDm in reactedUsers:
-                            if not userToDm.id == self.bot.user.id:
-                                try:
-                                    await userToDm.send("A new user has joined your Root game! Head to the LFG Channel to say hello.")
-                                except:
-                                    print("Failed to DM "+str(userToDm))
-            
-        if str(emoji.name) == "❌":
-            if user.mention == message.content.split(" ")[0]:
-                await message.edit(content="Game closed/full. Sorry!")
-            else:
-                print("Not game creator, cannot close.")
-    
-    @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload): # Todo: refactor
-        if int(payload.user_id) == int(self.bot.user.id):
-            return False
-        
-        if str(payload.emoji.name) in EMOJIS_OLD:
-            user = self.bot.get_user(int(payload.user_id))
-            channel = self.bot.get_channel(int(payload.channel_id))
-            message = await channel.fetch_message(int(payload.message_id))
-            if (message.author.id != self.bot.user.id):
-                return False
-            
-            if (" ".join((message.content.split(" ")[1:])).startswith("is looking for a")):
-                return await self.refresh_message(message, user, payload.emoji)
-                    
-    
-    @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload): # Todo: refactor
-        validEmojis = ["👍"]
-        
-        if int(payload.user_id) == int(self.bot.user.id):
-            return False
-        
-        if str(payload.emoji.name) in validEmojis:
-            user = self.bot.get_user(int(payload.user_id))
-            channel = self.bot.get_channel(int(payload.channel_id))
-            message = await channel.fetch_message(int(payload.message_id))
-            if (message.author.id != self.bot.user.id):
-                return False
-            
-            if " ".join((message.content.split(" ")[1:])).startswith("is looking for a"):
-                return await self.refresh_message(message, user, payload.emoji, notify=False)
     
 def setup(bot):
     config = configparser.ConfigParser()

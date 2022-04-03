@@ -80,7 +80,7 @@ class matchrolls(commands.Cog):
     
     @commands.command(brief="", name='random')
     async def random(self, ctx, *args):
-        if (len(args) and args[0] == common.HELP_COMMAND):
+        if (not(len(args)) or args[0] == common.HELP_COMMAND):
             return await self.random_help(ctx)
         
         guild = common.get_guild_from_config(self.config, ctx.guild.id)
