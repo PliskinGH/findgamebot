@@ -148,7 +148,14 @@ class matchmaking(commands.Cog):
         if (len(gameRole)):
             embed.add_field(name="Target", value=gameRole, inline=True)
         
-        field_text = ctx.message.author.mention
+        # Member and User return different mentions for server nicknames...
+        #☺ So this :
+        # field_text = ctx.message.author.mention
+        # can give exclamation marks on the IDs
+        # and can break comparisons of mentions when reacting
+        # We need the User object
+        user = self.bot.get_user(int(ctx.message.author.id))
+        field_text = user.mention
         embed.add_field(name="Host", value=field_text, inline=True)
         
         author_avatar = DEFAULT_AVATAR_URL
@@ -238,6 +245,8 @@ class matchmaking(commands.Cog):
             if (user in players and user.mention != host):
                 embed.add_field(name="Guest " + str(number), value=user.mention, inline=True)
                 for user_to_notify in users_to_notify:
+                    if (user_to_notify == user):
+                        continue
                     try:
                         message_to_send = "A new user (" + str(user) + ")"
                         message_to_send += " has joined your game!\n"
