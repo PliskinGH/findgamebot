@@ -155,7 +155,7 @@ class matchmaking(commands.Cog):
         display_avatar = ctx.message.author.display_avatar
         if (display_avatar is not None):
             author_avatar = display_avatar.url
-        embed.set_author(name=ctx.message.author.name,
+        embed.set_author(name=ctx.message.author.display_name,
                          icon_url=author_avatar)
         
         embed.title = "Looking for " 
