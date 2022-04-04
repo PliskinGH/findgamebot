@@ -3,6 +3,9 @@ from discord.ext import commands, tasks
 import configparser
 
 from utils import common
+
+LFG_COMMAND = "lfg"
+
 CONFIG_GAMES_COMMANDS = "GamesCommands"
 CONFIG_GAMES_NAMES = "GamesFullNames"
 CONFIG_GAMES_ROLES = "GamesRoles"
@@ -13,7 +16,6 @@ EMOJI_JOIN = "👍"
 EMOJI_NOTIFY = "🔔"
 EMOJI_CLOSE = "✅"
 EMOJIS_VALID = [EMOJI_JOIN, EMOJI_NOTIFY, EMOJI_CLOSE]
-EMOJIS_OLD = [EMOJI_JOIN, EMOJI_NOTIFY, "❌"]
 
 DEFAULT_AVATAR_URL = "https://i.imgur.com/xClQZ1Q.png"
 
@@ -24,6 +26,13 @@ class matchmaking(commands.Cog):
         self.bot = bot
         self.config = config
         self.threads = []
+        activity_text = str(self.bot.command_prefix) + LFG_COMMAND
+        activity = self.bot.activity
+        if (activity is None):
+            activity = discord.Game(name=activity_text)
+        else:
+            activity.name += " | " + activity_text
+        self.bot.activity = activity
         ## New feature to converge
         # self.refresh_threads.start()
         
@@ -51,15 +60,15 @@ class matchmaking(commands.Cog):
             except Exception as error:
                 print(error)
         self.threads = valid_threads
-        print("Refhreshed threads:\n", self.threads)
+        print("Refreshed threads:\n", self.threads)
     
     async def lfg_help(self, ctx):
         text = "Syntax:\n"
-        text += "`" + ctx.prefix
-        text += "lfg <game> <description>` where `<game>` is a game available on the server with a corresponding role to ping.\n"
+        text += "`" + ctx.prefix + LFG_COMMAND
+        text += " <game> <description>` where `<game>` is a game available on the server with a corresponding role to ping.\n"
         text += "or\n"
-        text += "`" + ctx.prefix
-        text += "lfg <description>` for a custom game (no automatic ping).\n"
+        text += "`" + ctx.prefix + LFG_COMMAND
+        text += " <description>` for a custom game (no automatic ping).\n"
         
         games, gamesNames = self.get_configured_games(ctx.guild.id, CONFIG_GAMES_COMMANDS, CONFIG_GAMES_NAMES)
         
@@ -82,7 +91,7 @@ class matchmaking(commands.Cog):
         
         await ctx.send(text,embed=embed)
     
-    @commands.command()
+    @commands.command(name=LFG_COMMAND)
     async def lfg(self, ctx, *desc):
         if (not(len(desc)) or desc[0] == common.HELP_COMMAND):
             return await self.lfg_help(ctx)

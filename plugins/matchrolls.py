@@ -13,6 +13,8 @@ import json
 
 from utils import common
 
+RANDOM_COMMAND = "random"
+
 class matchrolls(commands.Cog):
     
     def __init__(self, bot, config = None, desc = None):
@@ -20,11 +22,18 @@ class matchrolls(commands.Cog):
         self.bot = bot
         self.config = config
         self.desc = desc
+        activity_text = str(self.bot.command_prefix) + RANDOM_COMMAND
+        activity = self.bot.activity
+        if (activity is None):
+            activity = discord.Game(name=activity_text)
+        else:
+            activity.name += " | " + activity_text
+        self.bot.activity = activity
     
     async def random_help(self, ctx):
         text = "Syntax:\n"
-        text += "`" + ctx.prefix
-        text += "random <category> [<number> / <subset>]` where `<category>` is a type of set to roll from.\n"
+        text += "`" + ctx.prefix + RANDOM_COMMAND
+        text += " <category> [<number> / <subset>]` where `<category>` is a type of set to roll from.\n"
         text += "Example of subsets:\n"
         text += "`" + ctx.prefix
         text += "random <category> 6` to roll from the first 6 items in the set.\n"
@@ -78,7 +87,7 @@ class matchrolls(commands.Cog):
         
         return option, subset_choices, next_args
     
-    @commands.command(brief="", name='random')
+    @commands.command(brief="", name=RANDOM_COMMAND)
     async def random(self, ctx, *args):
         if (not(len(args)) or args[0] == common.HELP_COMMAND):
             return await self.random_help(ctx)

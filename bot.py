@@ -15,6 +15,7 @@ if (PREFIX is None):
     PREFIX = "!"
 
 intents = discord.Intents.all()
+intents.typing = False
     
 cogs_dir = "plugins"
 
@@ -34,7 +35,7 @@ async def on_ready():
 async def on_command_error(ctx, error):
     print(error, ctx)
 
-def loadPlugins():
+def load_plugins():
     activadedPlugins = []
     with open(cogs_dir+"/activated.conf") as f:
         activadedPlugins = f.readlines()
@@ -53,7 +54,7 @@ def loadPlugins():
             traceback.print_exc()
     
 if __name__ == "__main__":
-    print("Starting at time",str(datetime.datetime.now()))
-    loadPlugins()
+    print("Starting at time", str(datetime.datetime.now()))
+    load_plugins()
     
     bot.run(TOKEN)
