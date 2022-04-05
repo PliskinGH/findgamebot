@@ -45,8 +45,22 @@ class matchrolls(commands.Cog):
         
         sets = self.config.items(guild)
         rolls_list = []
-        align = len(max([cat for cat, rollset in sets], key=len))
+        cat_list = []
+        rollset_list = []
         for cat, rollset in sets:
+            if (not(len(cat)) or not(len(rollset))):
+                continue
+            if (rollset in rollset_list):
+                if (cat in cat_list):
+                    continue
+                index = rollset_list.index(rollset)
+                rollset = "alias for `"
+                rollset += str(cat_list[index]) + "`"
+            cat_list.append(cat)
+            rollset_list.append(rollset)
+        display_sets = list(zip(cat_list, rollset_list))
+        align = len(max([cat for cat, rollset in display_sets], key=len))
+        for cat, rollset in display_sets:
             roll_text = "• `"
             roll_text += str(cat)
             roll_text += " " * (align-len(str(cat))) + "`"
