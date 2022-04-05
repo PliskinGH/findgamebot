@@ -14,6 +14,7 @@ import json
 from utils import common
 
 RANDOM_COMMAND = "random"
+RANDOM_ALIASES = ["rand"]
 
 class matchrolls(commands.Cog):
     
@@ -87,7 +88,7 @@ class matchrolls(commands.Cog):
         
         return option, subset_choices, next_args
     
-    @commands.command(brief="", name=RANDOM_COMMAND)
+    @commands.command(brief="", name=RANDOM_COMMAND, aliases=RANDOM_ALIASES)
     async def random(self, ctx, *args):
         if (not(len(args)) or args[0] == common.HELP_COMMAND):
             return await self.random_help(ctx)
