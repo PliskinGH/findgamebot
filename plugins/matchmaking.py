@@ -158,6 +158,11 @@ class matchmaking(commands.Cog):
         if (not(len(gameColor))):
             gameColor = ctx.message.author.colour
         embed.colour = gameColor
+    
+        try:
+            await ctx.message.delete()
+        except Exception as error:
+            print(error)
         
         try:
             if (len(gameRole)):
@@ -168,11 +173,6 @@ class matchmaking(commands.Cog):
             await bot_message.add_reaction(EMOJI_JOIN)
             await bot_message.add_reaction(EMOJI_NOTIFY)
             await bot_message.add_reaction(EMOJI_CLOSE)
-        except Exception as error:
-            print(error)
-        
-        try:
-            await ctx.message.delete()
         except Exception as error:
             print(error)
     
@@ -198,44 +198,51 @@ class matchmaking(commands.Cog):
             return False
             
         embed = message.embeds[0]
-        
-        
         fields = embed.fields
         host = ""
+        target = ""
         for field in fields:
             if (field.name == "Host"):
                 host = field.value
-                break
-        if (not(len(message.reactions))):
-            return False # Game already closed, reactions cleaned
-        
-        players = []
-        users_to_notify = []
-        for reaction in message.reactions:
-            reaction_users = await reaction.users().flatten()
-            if ((self.bot.user not in reaction_users) \
-                and (str(reaction) in EMOJIS_VALID)):
-                return False # Game already closed, reactions cleaned
-            reaction_users.remove(self.bot.user)
-            if str(reaction) == EMOJI_JOIN:
-                players = reaction_users
-            if str(reaction) == EMOJI_NOTIFY:
-                users_to_notify = reaction_users
+            if (field.name == "Target"):
+                target = field.value
+        if (not(len(message.reactions)) # Game already closed, reactions cleaned
+            or not(len(host))): # Should not happen...
+            return False 
 
-        if (str(payload.emoji.name) == EMOJI_JOIN):
+        if (str(payload.emoji.name) == EMOJI_JOIN and user.mention != host):
+            players = []
+            users_to_notify = []
+            for reaction in message.reactions:
+                reaction_users = await reaction.users().flatten()
+                if ((self.bot.user not in reaction_users) \
+                    and (str(reaction) in EMOJIS_VALID)):
+                    return False # Game already closed, reactions cleaned
+                reaction_users.remove(self.bot.user)
+                if str(reaction) == EMOJI_JOIN:
+                    players = reaction_users
+                if str(reaction) == EMOJI_NOTIFY:
+                    users_to_notify = reaction_users
+                    
             embed.clear_fields()
-            number = 1
-            for field in fields:
-                if (field.name == "Target" or field.name == "Host"):
-                    embed.add_field(name = field.name, value=field.value, inline=True)
-                elif (field.name[:5] == "Guest"):
-                    if (not(field.name[6:].isdigit())):
-                        continue
-                    if (field.value != user.mention):
-                        embed.add_field(name = "Guest " + str(number), value=field.value, inline=True)
-                        number += 1
-            if (user in players and user.mention != host):
-                embed.add_field(name="Guest " + str(number), value=user.mention, inline=True)
+            if (len(target)):
+                embed.add_field(name="Target", value=target, inline=True)
+            embed.add_field(name="Host", value=host, inline=True)
+            guests = ""
+            for player in players:
+                if (player.mention == host):
+                    continue
+                if (len(guests)):
+                    guests += ", "
+                guests += player.mention
+            if (len(guests)):
+                embed.add_field(name ="Guests", value=guests, inline=False)
+            try:
+                await message.edit(embed=embed)
+            except Exception as error:
+                print(error)
+                
+            if (user in players):
                 for user_to_notify in users_to_notify:
                     if (user_to_notify == user):
                         continue
@@ -251,10 +258,6 @@ class matchmaking(commands.Cog):
                     except Exception as e:
                         print(e)
                         print("Failed to DM " + str(user_to_notify))
-            try:
-                await message.edit(embed=embed)
-            except Exception as error:
-                print(error)
                 
         if (str(payload.emoji.name) == EMOJI_CLOSE and user.mention == host):
             emoji_url = payload.emoji.url
