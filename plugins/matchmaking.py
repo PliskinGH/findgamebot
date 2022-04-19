@@ -140,7 +140,7 @@ class matchmaking(commands.Cog):
         field_text = user.mention
         embed.add_field(name="Host", value=field_text, inline=True)
         
-        author_avatar = DEFAULT_AVATAR_URL
+        author_avatar = common.DEFAULT_AVATAR_URL
         display_avatar = ctx.message.author.display_avatar
         if (display_avatar is not None):
             author_avatar = display_avatar.url
@@ -152,7 +152,7 @@ class matchmaking(commands.Cog):
         embed.title += " " + gameWanted + " game"
         
         if (not(len(gameIcon))):
-            gameIcon = DEFAULT_AVATAR_URL
+            gameIcon = common.DEFAULT_AVATAR_URL
         embed.set_thumbnail(url=gameIcon)
         
         if (not(len(gameColor))):

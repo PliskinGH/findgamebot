@@ -12,6 +12,8 @@ CONFIG_ID = "ID"
 
 HELP_COMMAND = "help"
 
+DEFAULT_AVATAR_URL = "https://i.imgur.com/xClQZ1Q.png"
+
 def split_config_list(value):
     if (value is None):
         return []

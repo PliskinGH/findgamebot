@@ -134,6 +134,12 @@ class matchrolls(commands.Cog):
             if ("title" in desc):
                 if ("category" in desc):
                     embed.title = "Random " + desc["category"] + ": " + desc["title"]
+                author_avatar = common.DEFAULT_AVATAR_URL
+                display_avatar = ctx.message.author.display_avatar
+                if (display_avatar is not None):
+                    author_avatar = display_avatar.url
+                embed.set_author(name=ctx.message.author.display_name,
+                                 icon_url=author_avatar)
                 embed.set_footer(text=footer_text)
                 await ctx.send(embed=embed)
         
