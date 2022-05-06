@@ -158,5 +158,21 @@
       "description":"At the end of a player's Evening, if that player rules the clearing with The Tower, that player scores **1VP**.",
       "color": 5127742,
       "category":"Landmark"
+   },
+   {
+      "title":"Standard",
+      "image": {"url": "https://i.imgur.com/nylKUN4.gif"},
+      "thumbnail": {"url": "https://i.imgur.com/vnXo6OY.gif"},
+      "description":"",
+      "color": 13585719,
+      "category":"Deck"
+   },
+   {
+      "title":"Exiles & Partisans",
+      "image": {"url": "https://i.imgur.com/bhf5GBu.gif"},
+      "thumbnail": {"url": "https://i.imgur.com/W7Jhrso.gif"},
+      "description":"",
+      "color": 10841778,
+      "category":"Deck"
    }
 ]
