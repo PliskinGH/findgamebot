@@ -165,11 +165,13 @@ class matchmaking(commands.Cog):
             print(error)
         
         try:
-            if (len(gameRole)):
-                bot_message = await ctx.send(content=gameRole)
-                await bot_message.edit(content="", embed=embed)
-            else:
-                bot_message = await ctx.send(content="", embed=embed)
+            # Ghost pings are not reliable anymore...
+            # if (len(gameRole)):
+            #     bot_message = await ctx.send(content=gameRole)
+            #     await bot_message.edit(content="", embed=embed)
+            # else:
+            #     bot_message = await ctx.send(content="", embed=embed)
+            bot_message = await ctx.send(content=gameRole, embed=embed)
             await bot_message.add_reaction(EMOJI_JOIN)
             await bot_message.add_reaction(EMOJI_NOTIFY)
             await bot_message.add_reaction(EMOJI_CLOSE)
