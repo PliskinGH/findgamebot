@@ -11,6 +11,7 @@ CONFIG_GAMES_NAMES = "GamesFullNames"
 CONFIG_GAMES_ROLES = "GamesRoles"
 CONFIG_GAMES_ICONS = "GamesIcons"
 CONFIG_GAMES_COLORS = "GamesColors"
+CONFIG_GAMES_FORUMS = "GamesForums"
 
 EMOJI_JOIN = "👍"
 EMOJI_NOTIFY = "🔔"
@@ -131,7 +132,7 @@ class matchmaking(commands.Cog):
             embed.add_field(name="Target", value=gameRole, inline=True)
         
         # Member and User return different mentions for server nicknames...
-        #☺ So this :
+        # So this :
         # field_text = ctx.message.author.mention
         # can give exclamation marks on the IDs
         # and can break comparisons of mentions when reacting
@@ -198,7 +199,8 @@ class matchmaking(commands.Cog):
             title = str(message.embeds[0].title)
         if (not(title.startswith("Looking for a"))):
             return False
-            
+        
+        # Recover target role and host
         embed = message.embeds[0]
         fields = embed.fields
         host = ""
@@ -211,32 +213,33 @@ class matchmaking(commands.Cog):
         if (not(len(message.reactions)) # Game already closed, reactions cleaned
             or not(len(host))): # Should not happen...
             return False 
+        
+        # Recover players (and users to notify)
+        players = []
+        users_to_notify = []
+        for reaction in message.reactions:
+            reaction_users = await reaction.users().flatten()
+            if ((self.bot.user not in reaction_users) \
+                and (str(reaction) in EMOJIS_VALID)):
+                return False # Game already closed, reactions cleaned
+            reaction_users.remove(self.bot.user)
+            if str(reaction) == EMOJI_JOIN:
+                players = reaction_users
+            if str(reaction) == EMOJI_NOTIFY:
+                users_to_notify = reaction_users
+        guests = ""
+        for player in players:
+            if (player.mention == host):
+                continue
+            if (len(guests)):
+                guests += ", "
+            guests += player.mention
 
         if (str(payload.emoji.name) == EMOJI_JOIN and user.mention != host):
-            players = []
-            users_to_notify = []
-            for reaction in message.reactions:
-                reaction_users = await reaction.users().flatten()
-                if ((self.bot.user not in reaction_users) \
-                    and (str(reaction) in EMOJIS_VALID)):
-                    return False # Game already closed, reactions cleaned
-                reaction_users.remove(self.bot.user)
-                if str(reaction) == EMOJI_JOIN:
-                    players = reaction_users
-                if str(reaction) == EMOJI_NOTIFY:
-                    users_to_notify = reaction_users
-                    
             embed.clear_fields()
             if (len(target)):
                 embed.add_field(name="Target", value=target, inline=True)
             embed.add_field(name="Host", value=host, inline=True)
-            guests = ""
-            for player in players:
-                if (player.mention == host):
-                    continue
-                if (len(guests)):
-                    guests += ", "
-                guests += player.mention
             if (len(guests)):
                 embed.add_field(name ="Guests", value=guests, inline=False)
             try:
@@ -271,13 +274,57 @@ class matchmaking(commands.Cog):
                 await message.clear_reactions()
             except Exception as error:
                 print(error)
-            ## New feature to converge
-            # try:
-            #     thread = await message.create_thread(name="Game thread")
-            #     self.threads.append(thread)
-            # except Exception as e:
-            #     print(e)
-            # print(self.threads)
+                
+            # New feature: create thread
+            # 3 cases: a) Do nothing if this message already has a thread
+            #          b) Create thread in a (forum) channel if available
+            #          c) Create thread under this message otherwise
+            if (message.thread is None):
+                gamesRoles, gamesForums = \
+                self.get_configured_games(payload.guild_id, \
+                                          CONFIG_GAMES_ROLES, \
+                                          CONFIG_GAMES_FORUMS)
+                nbGames = len(gamesForums)
+                index = -1
+                if (nbGames and nbGames == len(gamesRoles) and target in gamesRoles):
+                    index = gamesRoles.index(target)
+                
+                thread_channel = channel
+                parent_message = message
+                thread_in_forum = False
+                thread_pings = host
+                if (len(guests)):
+                    thread_pings += ", " + guests
+                thread_title = embed.description
+                thread_message = thread_pings + ", "
+                thread_message += "your game can start! GLHF!"
+                if (not(len(thread_title))):
+                    thread_title = "Game thread"
+                
+                keywords = {}
+                keywords['name'] = thread_title
+                
+                if (index >= 0 and index < nbGames):
+                    forum_id = gamesForums[index]
+                    forum = None
+                    if (len(forum_id)):
+                        forum = self.bot.get_channel(int(forum_id))
+                    if (forum is not None):
+                        thread_in_forum = True
+                        thread_channel = forum
+                        thread_embed = embed.copy()
+                        thread_embed.remove_footer()
+                        keywords['content'] = thread_message
+                        keywords['embed'] = thread_embed
+                if (not(thread_in_forum)):
+                    keywords['message'] = parent_message
+                    keywords['type'] = discord.ChannelType.public_thread
+                try:
+                    thread = await thread_channel.create_thread(**keywords)
+                    if (not(thread_in_forum)):
+                        await thread.send(content=thread_message)
+                except Exception as e:
+                    print(e)
     
 def setup(bot):
     config = configparser.ConfigParser()
