@@ -12,6 +12,7 @@ CONFIG_GAMES_ROLES = "GamesRoles"
 CONFIG_GAMES_ICONS = "GamesIcons"
 CONFIG_GAMES_COLORS = "GamesColors"
 CONFIG_GAMES_FORUMS = "GamesForums"
+CONFIG_GAMES_TAGS = "GamesTags"
 
 EMOJI_JOIN = "👍"
 EMOJI_NOTIFY = "🔔"
@@ -282,10 +283,11 @@ class matchmaking(commands.Cog):
             #          b) Create thread in a (forum) channel if available
             #          c) Create thread under this message otherwise
             if (str(payload.emoji.name) == EMOJI_START and message.thread is None):
-                gamesRoles, gamesForums = \
+                gamesRoles, gamesForums, gamesTags = \
                 self.get_configured_games(payload.guild_id, \
                                           CONFIG_GAMES_ROLES, \
-                                          CONFIG_GAMES_FORUMS)
+                                          CONFIG_GAMES_FORUMS, \
+                                          CONFIG_GAMES_TAGS)
                 nbGames = len(gamesForums)
                 index = -1
                 if (nbGames and nbGames == len(gamesRoles) and target in gamesRoles):
@@ -309,6 +311,9 @@ class matchmaking(commands.Cog):
                 if (index >= 0 and index < nbGames):
                     forum_id = gamesForums[index]
                     forum = None
+                    tag_name = ""
+                    if (nbGames == len(gamesTags)):
+                        tag_name = gamesTags[index]
                     if (len(forum_id)):
                         forum = self.bot.get_channel(int(forum_id))
                     if (forum is not None):
@@ -316,11 +321,20 @@ class matchmaking(commands.Cog):
                         thread_channel = forum
                         thread_embed = embed.copy()
                         thread_embed.remove_footer()
+                        thread_tag = None
+                        if (len(tag_name)):
+                            for forum_tag in forum.available_tags:
+                                if (forum_tag.name == tag_name):
+                                    thread_tag = forum_tag
+                        if (thread_tag is not None):
+                            keywords['applied_tags'] = [thread_tag]
                         keywords['content'] = thread_message
                         keywords['embed'] = thread_embed
+                        
                 if (not(thread_in_forum)):
                     keywords['message'] = parent_message
                     keywords['type'] = discord.ChannelType.public_thread
+                    
                 try:
                     thread = await thread_channel.create_thread(**keywords)
                     if (not(thread_in_forum)):
