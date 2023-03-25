@@ -15,8 +15,10 @@ CONFIG_GAMES_FORUMS = "GamesForums"
 
 EMOJI_JOIN = "👍"
 EMOJI_NOTIFY = "🔔"
-EMOJI_CLOSE = "✅"
-EMOJIS_VALID = [EMOJI_JOIN, EMOJI_NOTIFY, EMOJI_CLOSE]
+EMOJI_CANCEL = "❌"
+EMOJI_START = "✅"
+EMOJIS_VALID = [EMOJI_JOIN, EMOJI_NOTIFY, EMOJI_CANCEL, EMOJI_START]
+EMOJIS_CLOSE = [EMOJI_CANCEL, EMOJI_START]
 
 DEFAULT_AVATAR_URL = "https://i.imgur.com/xClQZ1Q.png"
 
@@ -126,7 +128,7 @@ class matchmaking(commands.Cog):
         if (len(desc)):
             text += " ".join(desc)
         embed = discord.Embed(description=text)
-        embed.set_footer(text="For discussion about this game, please use a thread.")
+        embed.set_footer(text="For discussion about this game, please use a thread.\nIt will be created for you when you close the game.")
         
         if (len(gameRole)):
             embed.add_field(name="Target", value=gameRole, inline=True)
@@ -173,9 +175,8 @@ class matchmaking(commands.Cog):
             # else:
             #     bot_message = await ctx.send(content="", embed=embed)
             bot_message = await ctx.send(content=gameRole, embed=embed)
-            await bot_message.add_reaction(EMOJI_JOIN)
-            await bot_message.add_reaction(EMOJI_NOTIFY)
-            await bot_message.add_reaction(EMOJI_CLOSE)
+            for emoji in EMOJIS_VALID:
+                await bot_message.add_reaction(emoji)
         except Exception as error:
             print(error)
     
@@ -185,7 +186,8 @@ class matchmaking(commands.Cog):
         if int(payload.user_id) == int(self.bot.user.id):
             return False
         
-        if str(payload.emoji.name) not in EMOJIS_VALID:
+        emoji_name = str(payload.emoji.name)
+        if emoji_name not in EMOJIS_VALID:
             return False
         
         user = self.bot.get_user(int(payload.user_id))
@@ -235,7 +237,7 @@ class matchmaking(commands.Cog):
                 guests += ", "
             guests += player.mention
 
-        if (str(payload.emoji.name) == EMOJI_JOIN and user.mention != host):
+        if (emoji_name == EMOJI_JOIN and user.mention != host):
             embed.clear_fields()
             if (len(target)):
                 embed.add_field(name="Target", value=target, inline=True)
@@ -264,10 +266,10 @@ class matchmaking(commands.Cog):
                         print(e)
                         print("Failed to DM " + str(user_to_notify))
                 
-        if (str(payload.emoji.name) == EMOJI_CLOSE and user.mention == host):
+        if (str(payload.emoji.name) in EMOJIS_CLOSE and user.mention == host):
             emoji_url = payload.emoji.url
             if (not(len(emoji_url))):
-                emoji_url = common.get_default_emoji_url(payload.emoji.name)
+                emoji_url = common.get_default_emoji_url(emoji_name)
             embed.set_footer(text="Game closed/full. Sorry!", icon_url=emoji_url)
             try:
                 await message.edit(embed=embed)
@@ -279,7 +281,7 @@ class matchmaking(commands.Cog):
             # 3 cases: a) Do nothing if this message already has a thread
             #          b) Create thread in a (forum) channel if available
             #          c) Create thread under this message otherwise
-            if (message.thread is None):
+            if (str(payload.emoji.name) == EMOJI_START and message.thread is None):
                 gamesRoles, gamesForums = \
                 self.get_configured_games(payload.guild_id, \
                                           CONFIG_GAMES_ROLES, \
