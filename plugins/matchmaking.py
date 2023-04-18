@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 import configparser
+import re
 
 from utils import common
 
@@ -29,7 +30,7 @@ class matchmaking(commands.Cog):
         print("Match making plugin started.")
         self.bot = bot
         self.config = config
-        self.threads = []
+        
         activity_text = str(self.bot.command_prefix) + LFG_COMMAND
         activity = self.bot.activity
         if (activity is None):
@@ -37,7 +38,11 @@ class matchmaking(commands.Cog):
         else:
             activity.name += " | " + activity_text
         self.bot.activity = activity
+        
+        self.custom_emoji_re = re.compile(r"<:[\w]+:[\d]+>")
+        
         ## New feature to converge
+        # self.threads = []
         # self.refresh_threads.start()
         
     def cog_unload(self):
@@ -299,9 +304,12 @@ class matchmaking(commands.Cog):
                 thread_pings = host
                 if (len(guests)):
                     thread_pings += ", " + guests
-                thread_title = embed.description
                 thread_message = thread_pings + ", "
                 thread_message += "your game can start! GLHF!"
+                
+                # Thread title = embed description without custom emojis
+                thread_title = embed.description
+                thread_title = "".join(self.custom_emoji_re.split(thread_title))
                 if (not(len(thread_title))):
                     thread_title = "Game thread"
                 
