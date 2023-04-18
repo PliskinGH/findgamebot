@@ -309,7 +309,10 @@ class matchmaking(commands.Cog):
                 
                 # Thread title = embed description without custom emojis
                 thread_title = embed.description
-                thread_title = "".join(self.custom_emoji_re.split(thread_title))
+                if (len(thread_title)):
+                    thread_title = "".join(self.custom_emoji_re.split(thread_title))
+                if (len(thread_title) > 100): # discord refuses thread if title too long
+                    thread_title = thread_title[:100]
                 if (not(len(thread_title))):
                     thread_title = "Game thread"
                 
