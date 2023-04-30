@@ -24,6 +24,10 @@ EMOJIS_CLOSE = [EMOJI_CANCEL, EMOJI_START]
 
 DEFAULT_AVATAR_URL = "https://i.imgur.com/xClQZ1Q.png"
 
+THREAD_TYPES = [discord.ChannelType.public_thread,
+                discord.ChannelType.private_thread,
+                discord.ChannelType.news_thread]
+
 class matchmaking(commands.Cog):
     
     def __init__(self, bot, config = None):
@@ -104,6 +108,8 @@ class matchmaking(commands.Cog):
     async def lfg(self, ctx, *desc):
         if (not(len(desc)) or desc[0] == common.HELP_COMMAND):
             return await self.lfg_help(ctx)
+        elif (ctx.channel.type in THREAD_TYPES):
+            return await self.rename_thread(ctx, *desc)
         else:
             return await self.lfg_v2(ctx, *desc)
     
@@ -186,6 +192,21 @@ class matchmaking(commands.Cog):
         except Exception as error:
             print(error)
     
+    @commands.command()
+    async def rename_thread(self, ctx, *desc):
+        thread = ctx.channel
+        if (not(thread.type in THREAD_TYPES)):
+            return False
+        
+        if (int(thread.owner_id) != int(self.bot.user.id)):
+            return False
+        
+        try:
+            await thread.edit(name=common.clean_thread_title(" ".join(desc),
+                                                        self.custom_emoji_re))
+        except Exception as e:
+            print(e)
+    
     @commands.Cog.listener(name = "on_raw_reaction_add")
     @commands.Cog.listener(name = "on_raw_reaction_remove")
     async def refresh_message_embed(self, payload):
@@ -259,14 +280,19 @@ class matchmaking(commands.Cog):
                 for user_to_notify in users_to_notify:
                     if (user_to_notify == user):
                         continue
+                    message_to_send = "A new user (" + str(user) + ")"
+                    message_to_send += " has joined your game"
+                    message_to_send += " in the LFG channel "
+                    message_to_send += channel.mention + ".\n"
+                    if (user_to_notify.mention == host):
+                        message_to_send += "When the game is full,"
+                        message_to_send += " you can start the thread using "
+                        message_to_send += EMOJI_START + ", which will ping"
+                        message_to_send += " all the players. GLHF!"
+                    else:
+                        message_to_send += "When the game thread starts,"
+                        message_to_send += " you will be pinged there. GLHF!"
                     try:
-                        message_to_send = "A new user (" + str(user) + ")"
-                        message_to_send += " has joined your game!\n"
-                        message_to_send += "Head to the LFG channel ("
-                        message_to_send += channel.mention
-                        message_to_send += ") of "
-                        message_to_send += "**" + str(channel.guild) + "**"
-                        message_to_send += " to start the discussion."
                         await user_to_notify.send(message_to_send)
                     except Exception as e:
                         print(e)
@@ -309,12 +335,13 @@ class matchmaking(commands.Cog):
                 
                 # Thread title = embed description without custom emojis
                 thread_title = embed.description
-                if (len(thread_title)):
-                    thread_title = "".join(self.custom_emoji_re.split(thread_title))
-                if (len(thread_title) > 100): # discord refuses thread if title too long
-                    thread_title = thread_title[:100]
-                if (not(len(thread_title))):
-                    thread_title = "Game thread"
+                thread_title = common.clean_thread_title(thread_title, self.custom_emoji_re)
+                # if (len(thread_title)):
+                #     thread_title = "".join(self.custom_emoji_re.split(thread_title))
+                # if (len(thread_title) > 100): # discord refuses thread if title too long
+                #     thread_title = thread_title[:100]
+                # if (not(len(thread_title))):
+                #     thread_title = "Game thread"
                 
                 keywords = {}
                 keywords['name'] = thread_title

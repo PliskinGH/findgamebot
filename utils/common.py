@@ -72,3 +72,13 @@ def get_default_emoji_url(emoji):
     emoji_id = ord(emoji[0])
     url = f"https://twemoji.maxcdn.com/v/latest/72x72/{emoji_id:x}.png"
     return url
+
+def clean_thread_title(title, re):
+    # Thread title = title with stripped patterns (re) < 100 characters
+    if (len(title)):
+        title = "".join(re.split(title))
+    if (len(title) > 100): # discord refuses thread if title too long
+        title = title[:100]
+    if (not(len(title))):
+        title = "Game thread"
+    return title
