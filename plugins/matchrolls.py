@@ -146,7 +146,7 @@ class matchrolls(commands.Cog):
         if (len(left_args)):
             await self.random(ctx, *left_args)
     
-def setup(bot):
+async def setup(bot):
     config = configparser.ConfigParser()
     config.read('config/rolls.ini')
     
@@ -154,4 +154,4 @@ def setup(bot):
     desc = json.load(json_file)
     json_file.close()
     
-    bot.add_cog(matchrolls(bot, config, desc))
+    await bot.add_cog(matchrolls(bot, config, desc))

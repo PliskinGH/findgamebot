@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 
+import asyncio
+
 import os
 from os.path import isfile, join
 import traceback
@@ -35,7 +37,7 @@ async def on_ready():
 async def on_command_error(ctx, error):
     print(error, ctx)
 
-def load_plugins():
+async def load_plugins():
     activadedPlugins = []
     with open(cogs_dir+"/activated.conf") as f:
         activadedPlugins = f.readlines()
@@ -46,7 +48,7 @@ def load_plugins():
         try:
             if (str(extension)[-3:] == ".py") and (not str(extension) == "__init__.py"):
                 if extension[:-3] in activadedPlugins:
-                    bot.load_extension(cogs_dir + "." + extension[:-3])
+                    await bot.load_extension(cogs_dir + "." + extension[:-3])
                 else:
                     print(str(extension[:-3])," disabled")
         except Exception:
@@ -55,6 +57,6 @@ def load_plugins():
     
 if __name__ == "__main__":
     print("Starting at time", str(datetime.datetime.now()))
-    load_plugins()
+    asyncio.run(load_plugins())
     
     bot.run(TOKEN)
