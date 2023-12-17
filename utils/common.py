@@ -75,6 +75,8 @@ def get_default_emoji_url(emoji):
 
 def clean_thread_title(title, re):
     # Thread title = title with stripped patterns (re) < 100 characters
+    if (title is None):
+        title = ""
     if (len(title)):
         title = "".join(re.split(title))
     if (len(title) > 100): # discord refuses thread if title too long
