@@ -81,6 +81,4 @@ def clean_thread_title(title, re):
         title = "".join(re.split(title))
     if (len(title) > 100): # discord refuses thread if title too long
         title = title[:100]
-    if (not(len(title))):
-        title = "Game thread"
     return title

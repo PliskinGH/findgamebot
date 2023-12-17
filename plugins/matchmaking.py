@@ -355,10 +355,11 @@ class matchmaking(commands.Cog):
         thread_embed = None
         
         # Thread title = embed description without custom emojis
-        thread_title = embed.description
+        thread_title = common.clean_thread_title(embed.description, self.custom_emoji_re)
         if (thread_title is None or not(len(thread_title))):
             thread_title = embed.title
-        thread_title = common.clean_thread_title(thread_title, self.custom_emoji_re)
+        if (thread_title is None or not(len(thread_title))):
+            thread_title = "Game thread"
         thread_visibility = True
         thread_tag = None
         
