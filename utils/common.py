@@ -78,7 +78,7 @@ def clean_thread_title(title, re):
     if (title is None):
         title = ""
     if (len(title)):
-        title = "".join(re.split(title))
+        title = "".join(re.split(title)).strip()
     if (len(title) > 100): # discord refuses thread if title too long
         title = title[:100]
     return title
