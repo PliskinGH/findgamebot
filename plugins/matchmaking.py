@@ -256,7 +256,7 @@ class matchmaking(commands.Cog):
             if ((self.bot.user not in reaction_users) \
                 and (str(reaction) in EMOJIS_VALID)):
                 return False # Game already closed, reactions cleaned
-            reaction_users.remove(self.bot.user)
+            reaction_users.discard(self.bot.user)
             if str(reaction) == EMOJI_JOIN:
                 players = reaction_users
             if str(reaction) == EMOJI_NOTIFY:
