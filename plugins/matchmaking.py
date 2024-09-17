@@ -29,6 +29,8 @@ THREAD_TYPES = [discord.ChannelType.public_thread,
                 discord.ChannelType.private_thread,
                 discord.ChannelType.news_thread]
 
+GUESTS_OVER_LIMIT = " and others..."
+
 class matchmaking(commands.Cog):
     
     def __init__(self, bot, config = None):
@@ -263,16 +265,26 @@ class matchmaking(commands.Cog):
                 users_to_notify = reaction_users
                 users_to_notify.discard(user)
         guests_mentions = ""
-        guests_full = ""
         for player in players:
             if (player.mention == host):
                 continue
             if (len(guests_mentions)):
                 guests_mentions += ", "
-            if (len(guests_full)):
-                guests_full += ", "
             guests_mentions += player.mention
-            guests_full += player.display_name + " (" + player.mention + ")"
+        guests_full = ""
+        for player in players:
+            if (player.mention == host):
+                continue
+            previous_size = len(guests_full)
+            new_guest = ""
+            if (previous_size):
+                new_guest += ", "
+            new_guest += player.display_name + " (" + player.mention + ")"
+            if (previous_size + len(new_guest) + len(GUESTS_OVER_LIMIT) <= 1024):
+                guests_full += new_guest
+            elif (previous_size):
+                guests_full += GUESTS_OVER_LIMIT
+                break
 
         if (emoji_name == EMOJI_JOIN and user.mention != host):
             embed.clear_fields()
