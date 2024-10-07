@@ -23,8 +23,6 @@ EMOJI_START = "✅"
 EMOJIS_VALID = [EMOJI_JOIN, EMOJI_NOTIFY, EMOJI_CANCEL, EMOJI_START]
 EMOJIS_CLOSE = [EMOJI_CANCEL, EMOJI_START]
 
-DEFAULT_AVATAR_URL = "https://i.imgur.com/xClQZ1Q.png"
-
 THREAD_TYPES = [discord.ChannelType.public_thread,
                 discord.ChannelType.private_thread,
                 discord.ChannelType.news_thread]
