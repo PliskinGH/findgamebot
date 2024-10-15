@@ -120,13 +120,16 @@ class matchmaking(commands.Cog):
         self.get_configured_games(ctx.guild.id, CONFIG_GAMES_COMMANDS, \
                                   CONFIG_GAMES_NAMES, CONFIG_GAMES_ROLES, \
                                   CONFIG_GAMES_ICONS, CONFIG_GAMES_COLORS)
-                
+
+        game = ""        
         gameWanted = "custom"
         gameRole = ""
         gameIcon = ""
         gameColor = ""
-        if (len(desc) and desc[0] in games):
-            index = games.index(desc[0])
+        if (len(desc)):
+            game = desc[0].lower()
+        if (len(game) and game in games):
+            index = games.index(game)
             if (len(gamesNames) == len(games) and len(gamesNames[index])):
                 gameWanted = gamesNames[index]
             if (len(gamesRoles) == len(games) and len(gamesRoles[index])):
