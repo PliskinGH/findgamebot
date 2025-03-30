@@ -15,6 +15,7 @@ CONFIG_GAMES_COLORS = "GamesColors"
 CONFIG_GAMES_FORUMS = "GamesForums"
 CONFIG_GAMES_TAGS = "GamesTags"
 CONFIG_GAMES_VISIBILITY = "GamesVisibility"
+CONFIG_GAMES_MESSAGES = "GamesMessages"
 
 EMOJI_JOIN = "👍"
 EMOJI_NOTIFY = "🔔"
@@ -340,12 +341,14 @@ class matchmaking(commands.Cog):
         #          b) Create thread in a (forum) channel if available
         #          c) Create thread under this message otherwise
     
-        gamesRoles, gamesForums, gamesTags, gamesVisibility = \
+        gamesRoles, gamesForums, gamesTags, \
+        gamesVisibility, gamesMessages = \
         self.get_configured_games(message.guild.id, \
                                   CONFIG_GAMES_ROLES, \
                                   CONFIG_GAMES_FORUMS, \
-                                  CONFIG_GAMES_TAGS,
-                                  CONFIG_GAMES_VISIBILITY)
+                                  CONFIG_GAMES_TAGS, \
+                                  CONFIG_GAMES_VISIBILITY, \
+                                  CONFIG_GAMES_MESSAGES)
         nbGames = len(gamesRoles)
         index = -1
         if (nbGames and len(target) and target in gamesRoles):
@@ -359,6 +362,10 @@ class matchmaking(commands.Cog):
             thread_pings += ", " + guests
         thread_message = thread_pings + ", "
         thread_message += "your game can start! GLHF!"
+        if (index >= 0 and nbGames == len(gamesMessages)):
+            game_message = gamesMessages[index]
+            if (len(game_message)):
+                thread_message += " " + game_message
         thread_embed = None
         
         # Thread title = embed description without custom emojis
