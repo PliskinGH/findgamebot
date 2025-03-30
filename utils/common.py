@@ -5,6 +5,7 @@ Created on Tue Mar 29 18:21:04 2022
 @author: Pliskin
 """
 
+import discord
 import re
 
 CONFIG_DEFAULT = "DEFAULT"
@@ -82,3 +83,12 @@ def clean_thread_title(title, re):
     if (len(title) > 100): # discord refuses thread if title too long
         title = title[:100]
     return title
+
+def update_bot_activity(bot, command):
+    activity_text = str(bot.command_prefix) + command
+    activity = bot.activity
+    if (activity is None):
+        activity = discord.Game(name=activity_text)
+    else:
+        activity.name += " | " + activity_text
+    bot.activity = activity

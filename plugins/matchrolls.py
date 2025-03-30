@@ -23,13 +23,8 @@ class matchrolls(commands.Cog):
         self.bot = bot
         self.config = config
         self.desc = desc
-        activity_text = str(self.bot.command_prefix) + RANDOM_COMMAND
-        activity = self.bot.activity
-        if (activity is None):
-            activity = discord.Game(name=activity_text)
-        else:
-            activity.name += " | " + activity_text
-        self.bot.activity = activity
+        
+        common.update_bot_activity(bot, RANDOM_COMMAND)
     
     async def random_help(self, ctx):
         text = "Syntax:\n"

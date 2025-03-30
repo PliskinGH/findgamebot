@@ -36,13 +36,7 @@ class matchmaking(commands.Cog):
         self.bot = bot
         self.config = config
         
-        activity_text = str(self.bot.command_prefix) + LFG_COMMAND
-        activity = self.bot.activity
-        if (activity is None):
-            activity = discord.Game(name=activity_text)
-        else:
-            activity.name += " | " + activity_text
-        self.bot.activity = activity
+        common.update_bot_activity(bot, LFG_COMMAND)
         
         self.custom_emoji_re = re.compile(r"<:[\w]+:[\d]+>")
         
