@@ -404,6 +404,7 @@ class matchmaking(commands.Cog):
         thread_has_parent = not(thread_in_forum) and thread_visibility
         if (not(thread_has_parent)):
             thread_embed = embed.copy()
+            thread_embed.url = message.jump_url
             thread_embed.remove_footer()
         if (thread_in_forum):
             if (thread_tag is not None):
