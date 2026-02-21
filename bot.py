@@ -16,6 +16,11 @@ PREFIX = os.getenv('COMMAND_PREFIX')
 if (PREFIX is None):
     PREFIX = "!"
 
+# The Base URL that the bot will use to lookup Player Registrations as soon as an RDL game starts. If not provided,
+# the bot will not check for player registrations.
+# Example: https://rootleague.pliskin.dev/api/registration
+RDL_PLAYER_REGISTRATION_BASE_URL = os.getenv('RDL_PLAYER_REGISTRATION_BASE_URL', None)
+
 intents = discord.Intents.all()
 intents.typing = False
     

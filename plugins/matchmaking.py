@@ -1,8 +1,11 @@
+
+import aiohttp
 import discord
 from discord.ext import commands, tasks
 import configparser
 import re
 
+from bot import RDL_PLAYER_REGISTRATION_BASE_URL
 from utils import common
 
 LFG_COMMAND = "lfg"
@@ -16,6 +19,7 @@ CONFIG_GAMES_FORUMS = "GamesForums"
 CONFIG_GAMES_TAGS = "GamesTags"
 CONFIG_GAMES_VISIBILITY = "GamesVisibility"
 CONFIG_GAMES_MESSAGES = "GamesMessages"
+CONFIG_GAMES_THREAD_CREATE_HANDLERS = "GamesThreadCreateHandlers"
 
 EMOJI_JOIN = "👍"
 EMOJI_NOTIFY = "🔔"
@@ -342,13 +346,14 @@ class matchmaking(commands.Cog):
         #          c) Create thread under this message otherwise
     
         gamesRoles, gamesForums, gamesTags, \
-        gamesVisibility, gamesMessages = \
+        gamesVisibility, gamesMessages, gamesThreadCreateHandlers = \
         self.get_configured_games(message.guild.id, \
                                   CONFIG_GAMES_ROLES, \
                                   CONFIG_GAMES_FORUMS, \
                                   CONFIG_GAMES_TAGS, \
                                   CONFIG_GAMES_VISIBILITY, \
-                                  CONFIG_GAMES_MESSAGES)
+                                  CONFIG_GAMES_MESSAGES, \
+                                  CONFIG_GAMES_THREAD_CREATE_HANDLERS)
         nbGames = len(gamesRoles)
         index = -1
         if (nbGames and len(target) and target in gamesRoles):
@@ -415,7 +420,13 @@ class matchmaking(commands.Cog):
             keywords['message'] = parent_message
         if (not(thread_visibility)):
             keywords['type'] = discord.ChannelType.private_thread
-        
+
+        thread_create_handler = None
+        if (index >= 0 and nbGames == len(gamesThreadCreateHandlers)):
+            handler_name = gamesThreadCreateHandlers[index]
+            if handler_name:
+                thread_create_handler = getattr(self, handler_name, None)
+
         try:
             thread = await thread_channel.create_thread(**keywords)
             if (thread_in_forum):
@@ -423,11 +434,34 @@ class matchmaking(commands.Cog):
             if (thread is not None):
                 if (not(thread_in_forum)):
                     await thread.send(content=thread_message, embed=thread_embed)
+                    if thread_create_handler:
+                        await thread_create_handler(thread)
                 embed.url = thread.jump_url
                 await message.edit(embed=embed)
         except Exception as e:
             print(e)
-    
+
+    async def after_rdl_thread_created(self, thread):
+        if not RDL_PLAYER_REGISTRATION_BASE_URL:
+            return
+
+        thread_members = await thread.fetch_members()
+
+        async with aiohttp.ClientSession() as session:
+            for thread_member in thread_members:
+                if thread_member.id == self.bot.user.id:
+                    # Skip the bot's user itself
+                    continue
+                user = await self.bot.fetch_user(thread_member.id)
+                async with session.get(F"{RDL_PLAYER_REGISTRATION_BASE_URL}/" + user.name + "/") as response:
+                    if response.status != 200:
+                        await thread.send(
+                            content=F"Welcome to the Root Digital League, {user.mention}! I couldn't find your "
+                                    "registration on the League's website. Please register on "
+                                    "https://rootleague.pliskin.dev/ and double-check that your profile has the "
+                                    "correct Discord username.")
+
+
 async def setup(bot):
     config = configparser.ConfigParser()
     config.read('config/games.ini')
