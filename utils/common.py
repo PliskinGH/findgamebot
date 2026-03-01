@@ -35,7 +35,7 @@ def get_guild_from_config(config, guild_id):
 
 def parse_intervals(string, cardinal):
     value_list = []
-    if not(re.match('^[0-9\-\,]*$', string)):
+    if not(re.match(r'^[0-9\-\,]*$', string)):
         return value_list
     
     intervals = []
