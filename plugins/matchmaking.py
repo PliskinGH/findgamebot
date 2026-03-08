@@ -4,8 +4,8 @@ import discord
 from discord.ext import commands, tasks
 import configparser
 import re
+import os
 
-from bot import RDL_PLAYER_REGISTRATION_BASE_URL
 from utils import common
 
 LFG_COMMAND = "lfg"
@@ -19,7 +19,9 @@ CONFIG_GAMES_FORUMS = "GamesForums"
 CONFIG_GAMES_TAGS = "GamesTags"
 CONFIG_GAMES_VISIBILITY = "GamesVisibility"
 CONFIG_GAMES_MESSAGES = "GamesMessages"
-CONFIG_GAMES_THREAD_CREATE_HANDLERS = "GamesThreadCreateHandlers"
+CONFIG_GAMES_REGISTRATION_API = "GamesRegistrationAPI"
+CONFIG_GAMES_API_TOKEN_ENV_VARS = "GamesAPITokenEnvVars"
+CONFIG_GAMES_REGISTRATION_URL = "GamesRegistrationURL"
 EMOJI_JOIN = "👍"
 EMOJI_NOTIFY = "🔔"
 EMOJI_CANCEL = "❌"
@@ -238,16 +240,20 @@ class matchmaking(commands.Cog):
         
         # Recover target role and host
         fields = embed.fields
-        host = ""
+        host_mention = ""
         target = ""
         for field in fields:
             if (field.name == "Host"):
-                host = field.value
+                host_mention = field.value
             if (field.name == "Target"):
                 target = field.value
         if (not(len(message.reactions)) # Game already closed, reactions cleaned
-            or not(len(host))): # Should not happen...
-            return False 
+            or not(len(host_mention))): # Should not happen...
+            return False
+        host_id = common.get_id_from_user_mention(host_mention)
+        host = None
+        if (host_id):
+            host = self.bot.get_user(host_id)
         
         # Recover players (and users to notify)
         players = []
@@ -263,33 +269,25 @@ class matchmaking(commands.Cog):
             if str(reaction) == EMOJI_NOTIFY:
                 users_to_notify = reaction_users
                 users_to_notify.discard(user)
-        guests_mentions = ""
-        for player in players:
-            if (player.mention == host):
-                continue
-            if (len(guests_mentions)):
-                guests_mentions += ", "
-            guests_mentions += player.mention
+        guests = [player for player in players if player.mention != host_mention]
         guests_full = ""
-        for player in players:
-            if (player.mention == host):
-                continue
+        for guest in guests:
             previous_size = len(guests_full)
             new_guest = ""
             if (previous_size):
                 new_guest += ", "
-            new_guest += player.display_name + " (" + player.mention + ")"
+            new_guest += guest.display_name + " (" + guest.mention + ")"
             if (previous_size + len(new_guest) + len(GUESTS_OVER_LIMIT) <= 1024):
                 guests_full += new_guest
             elif (previous_size):
                 guests_full += GUESTS_OVER_LIMIT
                 break
 
-        if (emoji_name == EMOJI_JOIN and user.mention != host):
+        if (emoji_name == EMOJI_JOIN and user.mention != host_mention):
             embed.clear_fields()
             if (len(target)):
                 embed.add_field(name="Target", value=target, inline=True)
-            embed.add_field(name="Host", value=host, inline=True)
+            embed.add_field(name="Host", value=host_mention, inline=True)
             if (len(guests_full)):
                 embed.add_field(name ="Guests", value=guests_full, inline=False)
             try:
@@ -298,9 +296,9 @@ class matchmaking(commands.Cog):
                 print(error)
                 
             if (user in players):
-                await self.notify_players(channel, host, user, users_to_notify)
+                await self.notify_players(channel, host_mention, user, users_to_notify)
                 
-        if (str(payload.emoji.name) in EMOJIS_CLOSE and user.mention == host):
+        if (str(payload.emoji.name) in EMOJIS_CLOSE and user.mention == host_mention):
             emoji_url = payload.emoji.url
             if (not(len(emoji_url))):
                 emoji_url = common.get_default_emoji_url(emoji_name)
@@ -314,7 +312,7 @@ class matchmaking(commands.Cog):
             if (str(payload.emoji.name) == EMOJI_START and \
                 message.guild.get_channel_or_thread(message.id) is None):
                 await self.create_game_thread(channel, message,
-                                              target, host, guests_mentions, embed)
+                                              target, host, guests, embed)
                     
     
     async def notify_players(self, channel, host, new_player, users_to_notify):
@@ -344,15 +342,19 @@ class matchmaking(commands.Cog):
         #          b) Create thread in a (forum) channel if available
         #          c) Create thread under this message otherwise
     
-        gamesRoles, gamesForums, gamesTags, \
-        gamesVisibility, gamesMessages, gamesThreadCreateHandlers = \
+        gamesNames, gamesRoles, gamesForums, gamesTags, \
+        gamesVisibility, gamesMessages, \
+        gamesRegistrationAPI, gamesTokenEnvVars, gamesRegistrationURL = \
         self.get_configured_games(message.guild.id, \
+                                  CONFIG_GAMES_NAMES, \
                                   CONFIG_GAMES_ROLES, \
                                   CONFIG_GAMES_FORUMS, \
                                   CONFIG_GAMES_TAGS, \
                                   CONFIG_GAMES_VISIBILITY, \
-                                  CONFIG_GAMES_MESSAGES,
-                                  CONFIG_GAMES_THREAD_CREATE_HANDLERS)
+                                  CONFIG_GAMES_MESSAGES, \
+                                  CONFIG_GAMES_REGISTRATION_API, \
+                                  CONFIG_GAMES_API_TOKEN_ENV_VARS, \
+                                  CONFIG_GAMES_REGISTRATION_URL)
         nbGames = len(gamesRoles)
         index = -1
         if (nbGames and len(target) and target in gamesRoles):
@@ -361,9 +363,11 @@ class matchmaking(commands.Cog):
         thread_channel = channel
         parent_message = message
         thread_in_forum = False
-        thread_pings = host
-        if (len(guests)):
-            thread_pings += ", " + guests
+        thread_pings = host.mention
+        for guest in guests:
+            if (len(thread_pings)):
+                thread_pings += ", "
+            thread_pings += guest.mention
         thread_message = thread_pings + ", "
         thread_message += "your game can start! GLHF!"
         if (index >= 0 and nbGames == len(gamesMessages)):
@@ -420,11 +424,20 @@ class matchmaking(commands.Cog):
         if (not(thread_visibility)):
             keywords['type'] = discord.ChannelType.private_thread
 
-        thread_create_handler = None
-        if (index >= 0 and nbGames == len(gamesThreadCreateHandlers)):
-            handler_name = gamesThreadCreateHandlers[index]
-            if handler_name:
-                thread_create_handler = getattr(self, handler_name, None)
+        gameName = None
+        if (index >= 0 and nbGames == len(gamesNames)):
+            gameName = gamesNames[index]
+        registration_api_url = None
+        if (index >= 0 and nbGames == len(gamesRegistrationAPI)):
+            registration_api_url = gamesRegistrationAPI[index]
+        auth_token = None
+        if (index >= 0 and nbGames == len(gamesTokenEnvVars)):
+            token_env_var = gamesTokenEnvVars[index]
+            if (token_env_var):
+                auth_token = os.getenv(token_env_var)
+        registration_url = None
+        if (index >= 0 and nbGames == len(gamesRegistrationURL)):
+            registration_url = gamesRegistrationURL[index]
         
         try:
             thread = await thread_channel.create_thread(**keywords)
@@ -433,32 +446,49 @@ class matchmaking(commands.Cog):
             if (thread is not None):
                 if (not(thread_in_forum)):
                     await thread.send(content=thread_message, embed=thread_embed)
-                    if thread_create_handler:
-                        await thread_create_handler(thread)
                 embed.url = thread.jump_url
                 await message.edit(embed=embed)
+                if registration_api_url:
+                    users = [host] + guests
+                    await self.check_registration(thread, users, registration_api_url, gameName, auth_token, registration_url)
         except Exception as e:
             print(e)
 
-    async def after_rdl_thread_created(self, thread):
-        if not RDL_PLAYER_REGISTRATION_BASE_URL:
+    async def check_registration(self, thread, users, api_url, website_name=None, auth_token=None, registration_url=None):
+        if (not(api_url) or not(users)):
             return
 
-        thread_members = await thread.fetch_members()
-
-        async with aiohttp.ClientSession() as session:
-            for thread_member in thread_members:
-                if thread_member.id == self.bot.user.id:
+        unregistered_users = []
+        headers = None
+        if (auth_token):
+            headers={"Authorization": f"Token {auth_token}"}
+        async with aiohttp.ClientSession(headers=headers) as session:
+            for user in users:
+                if user.id == self.bot.user.id:
                     # Skip the bot's user itself
                     continue
-                user = await self.bot.fetch_user(thread_member.id)
-                async with session.get(F"{RDL_PLAYER_REGISTRATION_BASE_URL}/" + user.name + "/") as response:
+                async with session.get(api_url + user.name + "/") as response:
                     if response.status != 200:
-                        await thread.send(
-                            content=F"Welcome to the Root Digital League, {user.mention}! I couldn't find your "
-                                    "registration on the League's website. Please register on "
-                                    "https://rootleague.pliskin.dev/ and double-check that your profile has the "
-                                    "correct Discord username.")
+                        unregistered_users.append(user)
+
+        if (not(unregistered_users)):
+            return
+
+        message = "Welcome"
+        for user in unregistered_users:
+            message += f", {user.mention}"
+        message += "! I couldn't find your registration"
+        if (website_name):
+            message += " on "
+            if (registration_url):
+                message += f"[{website_name}]({registration_url})"
+            else:
+                message += website_name
+            message += " website"
+        message += ". Please register and/or double check" \
+                   " that your profile has the correct Discord username. "
+        
+        await thread.send(content=message)                
 
 
 async def setup(bot):
