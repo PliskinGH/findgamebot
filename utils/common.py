@@ -92,3 +92,8 @@ def update_bot_activity(bot, command):
     else:
         activity.name += " | " + activity_text
     bot.activity = activity
+
+def get_id_from_user_mention(mention):
+    match = re.match(r'^<@([0-9]*)>$', mention)
+    if (match):
+        return int(match.group(1))
