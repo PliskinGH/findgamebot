@@ -21,7 +21,9 @@ CONFIG_GAMES_VISIBILITY = "GamesVisibility"
 CONFIG_GAMES_MESSAGES = "GamesMessages"
 CONFIG_GAMES_REGISTRATION_API = "GamesRegistrationAPI"
 CONFIG_GAMES_API_TOKEN_ENV_VARS = "GamesAPITokenEnvVars"
+CONFIG_GAMES_WEBSITE_URL = "GamesWebsiteURL"
 CONFIG_GAMES_REGISTRATION_URL = "GamesRegistrationURL"
+CONFIG_GAMES_PROFILE_URL = "GamesProfileURL"
 EMOJI_JOIN = "👍"
 EMOJI_NOTIFY = "🔔"
 EMOJI_CANCEL = "❌"
@@ -344,7 +346,8 @@ class matchmaking(commands.Cog):
     
         gamesNames, gamesRoles, gamesForums, gamesTags, \
         gamesVisibility, gamesMessages, \
-        gamesRegistrationAPI, gamesTokenEnvVars, gamesRegistrationURL = \
+        gamesRegistrationAPI, gamesTokenEnvVars, \
+        gamesWebsiteURL, gamesRegistrationURL, gamesProfileURL = \
         self.get_configured_games(message.guild.id, \
                                   CONFIG_GAMES_NAMES, \
                                   CONFIG_GAMES_ROLES, \
@@ -354,7 +357,9 @@ class matchmaking(commands.Cog):
                                   CONFIG_GAMES_MESSAGES, \
                                   CONFIG_GAMES_REGISTRATION_API, \
                                   CONFIG_GAMES_API_TOKEN_ENV_VARS, \
-                                  CONFIG_GAMES_REGISTRATION_URL)
+                                  CONFIG_GAMES_WEBSITE_URL, \
+                                  CONFIG_GAMES_REGISTRATION_URL, \
+                                  CONFIG_GAMES_PROFILE_URL)
         nbGames = len(gamesRoles)
         index = -1
         if (nbGames and len(target) and target in gamesRoles):
@@ -435,9 +440,15 @@ class matchmaking(commands.Cog):
             token_env_var = gamesTokenEnvVars[index]
             if (token_env_var):
                 auth_token = os.getenv(token_env_var)
+        website_url = None
+        if (index >= 0 and nbGames == len(gamesWebsiteURL)):
+            website_url = gamesWebsiteURL[index]
         registration_url = None
         if (index >= 0 and nbGames == len(gamesRegistrationURL)):
             registration_url = gamesRegistrationURL[index]
+        profile_url = None
+        if (index >= 0 and nbGames == len(gamesProfileURL)):
+            profile_url = gamesProfileURL[index]
         
         try:
             thread = await thread_channel.create_thread(**keywords)
@@ -450,11 +461,15 @@ class matchmaking(commands.Cog):
                 await message.edit(embed=embed)
                 if registration_api_url:
                     users = [host] + guests
-                    await self.check_registration(thread, users, registration_api_url, gameName, auth_token, registration_url)
+                    await self.check_registration(thread, users, registration_api_url,
+                                                  gameName, auth_token,
+                                                  website_url, registration_url, profile_url)
         except Exception as e:
             print(e)
 
-    async def check_registration(self, thread, users, api_url, website_name=None, auth_token=None, registration_url=None):
+    async def check_registration(self, thread, users, api_url,
+                                 website_name=None, auth_token=None,
+                                 website_url=None, registration_url=None, profile_url=None):
         if (not(api_url) or not(users)):
             return
 
@@ -480,13 +495,23 @@ class matchmaking(commands.Cog):
         message += "! I couldn't find your registration"
         if (website_name):
             message += " on "
-            if (registration_url):
-                message += f"[{website_name}]({registration_url})"
+            if (website_url):
+                message += f"[{website_name}]({website_url})"
             else:
                 message += website_name
             message += " website"
-        message += ". Please register and/or double check" \
-                   " that your profile has the correct Discord username. "
+        message += ". Please "
+        if (registration_url):
+            message += f"[register]({registration_url})"
+        else:
+            message += "register"
+        message += " and/or double check" \
+                   " that your "
+        if (profile_url):
+            message += f"[profile]({profile_url})"
+        else:
+            message += "profile"
+        message += " has the correct Discord username. "
         
         await thread.send(content=message)                
 
